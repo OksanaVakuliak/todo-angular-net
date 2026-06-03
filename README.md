@@ -83,6 +83,21 @@ The project will use:
 
 Detailed setup steps will be added as implementation progresses.
 
+## Repository Structure
+
+```text
+TodoApp.sln
+src/
+  backend/
+    TodoApp.Api/
+    TodoApp.Services/
+    TodoApp.Interfaces/
+    TodoApp.DataAccess/
+  frontend/
+    todo-ui/
+# tests/ (planned)
+```
+
 ## Repository Status
 
 Current status:

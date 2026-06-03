@@ -1,7 +1,8 @@
 # OS / Editor
 .DS_Store
 Thumbs.db
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
@@ -46,6 +47,10 @@ TestResults/
 # Docker
 docker-data/
 
+# Local toolchains
+.tools/
+dotnet-install.ps1
+
 # Secrets / certificates
 *.pfx
 *.snk
@@ -54,4 +59,3 @@ secrets.json
 # Generated packages
 *.nupkg
 packages/
-
