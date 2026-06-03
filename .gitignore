@@ -1,0 +1,57 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Node / Angular
+node_modules/
+dist/
+tmp/
+out-tsc/
+.angular/
+coverage/
+
+# .NET build output
+bin/
+obj/
+TestResults/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+
+# Visual Studio
+.vs/
+
+# EF / local tooling
+*.dbmdl
+*.jfm
+
+# Docker
+docker-data/
+
+# Secrets / certificates
+*.pfx
+*.snk
+secrets.json
+
+# Generated packages
+*.nupkg
+packages/
+
