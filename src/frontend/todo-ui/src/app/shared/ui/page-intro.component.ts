@@ -2,6 +2,7 @@ import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-page-intro',
+  standalone: true,
   template: `
     <header class="page-intro">
       <p class="eyebrow">{{ eyebrow() }}</p>

@@ -3,6 +3,7 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
 
 @Component({
   selector: 'app-login-page',
+  standalone: true,
   imports: [PageIntroComponent],
   template: `
     <app-page-intro
