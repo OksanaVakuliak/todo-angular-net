@@ -21,7 +21,9 @@ WORKDIR /app
 EXPOSE 8080
 
 ENV ASPNETCORE_URLS=http://+:8080
-ENV ASPNETCORE_ENVIRONMENT=Development
 
 COPY --from=build /app/publish .
+RUN chown -R app:app /app
+
+USER app
 ENTRYPOINT ["dotnet", "TodoApp.Api.dll"]
