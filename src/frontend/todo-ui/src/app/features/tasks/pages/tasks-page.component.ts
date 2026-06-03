@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { catchError, map, of, startWith } from 'rxjs';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
 
 @Component({
@@ -11,6 +14,56 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
       title="Task workspace scaffold"
       description="This page will become the main task list with CRUD actions, pagination, search, and category filtering."
     />
+
+    <section class="stack-status" aria-labelledby="stack-status-title">
+      <h2 id="stack-status-title">Local stack status</h2>
+      <p>{{ healthStatus().message }}</p>
+    </section>
+  `,
+  styles: [
+    `
+    .stack-status {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid rgba(37, 99, 235, 0.15);
+      border-radius: 1rem;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(15, 23, 42, 0.03));
+      color: #0f172a;
+    }
+
+    .stack-status h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+    }
+
+    .stack-status p {
+      margin: 0;
+      line-height: 1.5;
+    }
   `
+  ]
 })
-export class TasksPageComponent {}
+export class TasksPageComponent {
+  private readonly httpClient = inject(HttpClient);
+
+  protected readonly healthStatus = toSignal(
+    this.httpClient.get<{ status: string; service: string }>('/api/health').pipe(
+      map((response) => ({
+        message: `Frontend is connected to ${response.service}. API status: ${response.status}.`
+      })),
+      catchError(() =>
+        of({
+          message: 'Frontend is running, but the API health endpoint is not reachable yet.'
+        })
+      ),
+      startWith({
+        message: 'Checking backend connectivity...'
+      })
+    ),
+    {
+      initialValue: {
+        message: 'Checking backend connectivity...'
+      }
+    }
+  );
+}

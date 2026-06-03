@@ -81,7 +81,77 @@ The project will use:
 - backend migrations via `EF Core`
 - Angular frontend running locally during development
 
-Detailed setup steps will be added as implementation progresses.
+### Full Stack in Docker
+
+1. Create a local environment file:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+2. Update `MSSQL_SA_PASSWORD` in `.env`.
+   SQL Server requires a strong password with upper/lowercase letters, numbers, and a symbol.
+
+3. Start the full application stack:
+
+   ```powershell
+   docker compose up -d --build
+   ```
+
+4. Check that the containers are running:
+
+   ```powershell
+   docker compose ps
+   ```
+
+5. Open the apps:
+
+   - Frontend: `http://localhost:4200`
+   - Backend Swagger: `http://localhost:8080/swagger`
+   - Health endpoint: `http://localhost:8080/api/health`
+
+The frontend container proxies `/api/*` requests to the backend container, so the UI and API work together without extra local setup.
+
+The SQL Server files are stored in a Docker named volume called `sqlserver-data`, so data persists between container restarts without relying on a host bind mount.
+
+### Connection Details
+
+- Host: `localhost`
+- Port: `1433` by default, or `MSSQL_PORT` from `.env`
+- Username: `sa`
+- Password: `MSSQL_SA_PASSWORD` from `.env`
+- Default database for the first connection: `master`
+
+The backend container receives `ConnectionStrings__DefaultConnection` automatically through `docker-compose.yml` and targets the `sqlserver` service on the internal Docker network.
+
+### DBeaver
+
+- Driver: `SQL Server`
+- Host: `localhost`
+- Port: `1433`
+- Database: `master`
+- Authentication: `SQL Server Authentication`
+- Username: `sa`
+- Password: value from `.env`
+- Connection properties: enable certificate trust if the driver prompts for encryption settings
+
+### SSMS
+
+- Server name: `localhost,1433`
+- Authentication: `SQL Server Authentication`
+- Login: `sa`
+- Password: value from `.env`
+- Encryption: trust the server certificate if prompted
+
+### Useful Commands
+
+```powershell
+docker compose logs -f
+docker compose stop
+docker compose start
+docker compose down
+docker volume ls
+```
 
 ## Repository Structure
 
