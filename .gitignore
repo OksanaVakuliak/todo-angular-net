@@ -49,7 +49,7 @@ docker-data/
 
 # Local toolchains
 .tools/
-.dotnet-install.ps1
+dotnet-install.ps1
 
 # Secrets / certificates
 *.pfx

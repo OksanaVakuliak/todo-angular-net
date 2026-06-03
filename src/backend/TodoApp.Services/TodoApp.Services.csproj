@@ -1,9 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
     <ProjectReference Include="..\TodoApp.Interfaces\TodoApp.Interfaces.csproj" />
-    <ProjectReference Include="..\TodoApp.DataAccess\TodoApp.DataAccess.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
