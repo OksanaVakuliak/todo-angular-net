@@ -6,8 +6,37 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: ${MSSQL_PID:-Developer}
-      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env before starting Docker Compose}
     ports:
       - "${MSSQL_PORT:-1433}:1433"
     volumes:
-      - ./docker-data/sqlserver:/var/opt/mssql
+      - sqlserver-data:/var/opt/mssql
+
+  backend:
+    build:
+      context: .
+      dockerfile: src/backend/TodoApp.Api/Dockerfile
+    container_name: todoapp-backend
+    depends_on:
+      sqlserver:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=${TODOAPP_DB_NAME:-TodoAppDb};User Id=sa;Password=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env before starting Docker Compose};TrustServerCertificate=True;Encrypt=False"
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: src/frontend/todo-ui/Dockerfile
+    container_name: todoapp-frontend
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+
+volumes:
+  sqlserver-data:

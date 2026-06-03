@@ -1,0 +1,12 @@
+.git
+.gitignore
+.vscode
+.tools
+docker-data
+tests
+
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/.angular

@@ -81,7 +81,7 @@ The project will use:
 - backend migrations via `EF Core`
 - Angular frontend running locally during development
 
-### SQL Server in Docker
+### Full Stack in Docker
 
 1. Create a local environment file:
 
@@ -92,19 +92,27 @@ The project will use:
 2. Update `MSSQL_SA_PASSWORD` in `.env`.
    SQL Server requires a strong password with upper/lowercase letters, numbers, and a symbol.
 
-3. Start the database container:
+3. Start the full application stack:
 
    ```powershell
-   docker compose up -d sqlserver
+   docker compose up -d --build
    ```
 
-4. Check that the container is running:
+4. Check that the containers are running:
 
    ```powershell
    docker compose ps
    ```
 
-The database files are stored in `./docker-data/sqlserver`, so data persists between container restarts.
+5. Open the apps:
+
+   - Frontend: `http://localhost:4200`
+   - Backend Swagger: `http://localhost:8080/swagger`
+   - Health endpoint: `http://localhost:8080/api/health`
+
+The frontend container proxies `/api/*` requests to the backend container, so the UI and API work together without extra local setup.
+
+The SQL Server files are stored in a Docker named volume called `sqlserver-data`, so data persists between container restarts without relying on a host bind mount.
 
 ### Connection Details
 
@@ -114,7 +122,7 @@ The database files are stored in `./docker-data/sqlserver`, so data persists bet
 - Password: `MSSQL_SA_PASSWORD` from `.env`
 - Default database for the first connection: `master`
 
-`TODOAPP_DB_NAME` is reserved for the application database name that will be used once `EF Core` migrations are added.
+The backend container receives `ConnectionStrings__DefaultConnection` automatically through `docker-compose.yml` and targets the `sqlserver` service on the internal Docker network.
 
 ### DBeaver
 
@@ -138,9 +146,11 @@ The database files are stored in `./docker-data/sqlserver`, so data persists bet
 ### Useful Commands
 
 ```powershell
-docker compose stop sqlserver
-docker compose start sqlserver
+docker compose logs -f
+docker compose stop
+docker compose start
 docker compose down
+docker volume ls
 ```
 
 ## Repository Structure
