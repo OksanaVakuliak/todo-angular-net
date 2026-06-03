@@ -81,7 +81,67 @@ The project will use:
 - backend migrations via `EF Core`
 - Angular frontend running locally during development
 
-Detailed setup steps will be added as implementation progresses.
+### SQL Server in Docker
+
+1. Create a local environment file:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+2. Update `MSSQL_SA_PASSWORD` in `.env`.
+   SQL Server requires a strong password with upper/lowercase letters, numbers, and a symbol.
+
+3. Start the database container:
+
+   ```powershell
+   docker compose up -d sqlserver
+   ```
+
+4. Check that the container is running:
+
+   ```powershell
+   docker compose ps
+   ```
+
+The database files are stored in `./docker-data/sqlserver`, so data persists between container restarts.
+
+### Connection Details
+
+- Host: `localhost`
+- Port: `1433` by default, or `MSSQL_PORT` from `.env`
+- Username: `sa`
+- Password: `MSSQL_SA_PASSWORD` from `.env`
+- Default database for the first connection: `master`
+
+`TODOAPP_DB_NAME` is reserved for the application database name that will be used once `EF Core` migrations are added.
+
+### DBeaver
+
+- Driver: `SQL Server`
+- Host: `localhost`
+- Port: `1433`
+- Database: `master`
+- Authentication: `SQL Server Authentication`
+- Username: `sa`
+- Password: value from `.env`
+- Connection properties: enable certificate trust if the driver prompts for encryption settings
+
+### SSMS
+
+- Server name: `localhost,1433`
+- Authentication: `SQL Server Authentication`
+- Login: `sa`
+- Password: value from `.env`
+- Encryption: trust the server certificate if prompted
+
+### Useful Commands
+
+```powershell
+docker compose stop sqlserver
+docker compose start sqlserver
+docker compose down
+```
 
 ## Repository Structure
 
