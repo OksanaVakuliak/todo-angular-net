@@ -95,7 +95,7 @@ src/
     TodoApp.DataAccess/
   frontend/
     todo-ui/
-tests/
+# tests/ (planned)
 ```
 
 ## Repository Status
