@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TodoApp.DataAccess.Persistence;
+using TodoApp.DataAccess.Repositories;
+using TodoApp.Interfaces.Repositories;
 
 namespace TodoApp.DataAccess.DependencyInjection;
 
@@ -17,6 +19,7 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContext<TodoAppDbContext>(options =>
             options.UseSqlServer(connectionString));
+        services.AddScoped<IDatabaseHealthRepository, DatabaseHealthRepository>();
 
         return services;
     }
