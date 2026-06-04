@@ -122,7 +122,14 @@ The SQL Server files are stored in a Docker named volume called `sqlserver-data`
 - Password: `MSSQL_SA_PASSWORD` from `.env`
 - Default database for the first connection: `master`
 
-The backend container receives `ConnectionStrings__DefaultConnection` automatically through `docker-compose.yml` and targets the `sqlserver` service on the internal Docker network.
+The backend container receives `ConnectionStrings__DefaultConnection` automatically through `docker-compose.yml` and targets the `sqlserver` service on the internal Docker network. The tracked `appsettings*.json` files intentionally keep `ConnectionStrings:DefaultConnection` empty so database credentials are not committed.
+
+When running the backend directly from Git Bash, set the connection string through the environment before `dotnet run`:
+
+```bash
+export ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
+dotnet run --project src/backend/TodoApp.Api/TodoApp.Api.csproj
+```
 
 ### DBeaver
 
@@ -145,7 +152,7 @@ The backend container receives `ConnectionStrings__DefaultConnection` automatica
 
 ### Useful Commands
 
-```powershell
+```bash
 docker compose logs -f
 docker compose stop
 docker compose start

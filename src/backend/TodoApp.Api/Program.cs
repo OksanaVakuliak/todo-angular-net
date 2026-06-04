@@ -1,4 +1,5 @@
 using TodoApp.DataAccess.DependencyInjection;
+using TodoApp.DataAccess.Persistence;
 using TodoApp.Services.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,9 +18,11 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
-builder.Services.AddDataAccessServices();
+builder.Services.AddDataAccessServices(builder.Configuration);
 
 var app = builder.Build();
+
+await app.Services.InitializeDatabaseAsync();
 
 if (app.Environment.IsDevelopment())
 {
