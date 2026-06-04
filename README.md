@@ -114,6 +114,32 @@ The frontend container proxies `/api/*` requests to the backend container, so th
 
 The SQL Server files are stored in a Docker named volume called `sqlserver-data`, so data persists between container restarts without relying on a host bind mount.
 
+The backend applies pending EF Core migrations during startup. When `docker compose up -d --build` starts the backend after SQL Server becomes healthy, the database schema is created from the tracked migrations without manual SQL.
+
+### Database Migrations
+
+EF Core CLI is tracked as a local .NET tool. Restore it before creating or applying migrations locally:
+
+```powershell
+dotnet tool restore
+```
+
+Create a migration from the repository root:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
+dotnet tool run dotnet-ef -- migrations add <MigrationName> --project src/backend/TodoApp.DataAccess/TodoApp.DataAccess.csproj --startup-project src/backend/TodoApp.Api/TodoApp.Api.csproj --output-dir Persistence/Migrations
+```
+
+Apply migrations to the local Docker SQL Server instance:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
+dotnet tool run dotnet-ef -- database update --project src/backend/TodoApp.DataAccess/TodoApp.DataAccess.csproj --startup-project src/backend/TodoApp.Api/TodoApp.Api.csproj
+```
+
+Use the same `MSSQL_SA_PASSWORD` value that is configured in `.env`. The first migration creates the EF migrations history table, and later migrations will evolve the schema from code-first model changes.
+
 ### Connection Details
 
 - Host: `localhost`
