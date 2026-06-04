@@ -18,7 +18,9 @@ public static class ServiceCollectionExtensions
                 "Connection string 'DefaultConnection' is missing from configuration.");
 
         services.AddDbContext<TodoAppDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseSqlServer(
+                connectionString,
+                sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
         services.AddScoped<IDatabaseHealthRepository, DatabaseHealthRepository>();
 
         return services;
