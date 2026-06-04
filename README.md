@@ -85,8 +85,8 @@ The project will use:
 
 1. Create a local environment file:
 
-   ```powershell
-   Copy-Item .env.example .env
+   ```bash
+   cp .env.example .env
    ```
 
 2. Update `MSSQL_SA_PASSWORD` in `.env`.
@@ -94,13 +94,13 @@ The project will use:
 
 3. Start the full application stack:
 
-   ```powershell
+   ```bash
    docker compose up -d --build
    ```
 
 4. Check that the containers are running:
 
-   ```powershell
+   ```bash
    docker compose ps
    ```
 
@@ -120,21 +120,21 @@ The backend applies pending EF Core migrations during startup. When `docker comp
 
 EF Core CLI is tracked as a local .NET tool. Restore it before creating or applying migrations locally:
 
-```powershell
+```bash
 dotnet tool restore
 ```
 
 Create a migration from the repository root:
 
-```powershell
-$env:ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
+```bash
+export ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
 dotnet tool run dotnet-ef -- migrations add <MigrationName> --project src/backend/TodoApp.DataAccess/TodoApp.DataAccess.csproj --startup-project src/backend/TodoApp.Api/TodoApp.Api.csproj --output-dir Persistence/Migrations
 ```
 
 Apply migrations to the local Docker SQL Server instance:
 
-```powershell
-$env:ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
+```bash
+export ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
 dotnet tool run dotnet-ef -- database update --project src/backend/TodoApp.DataAccess/TodoApp.DataAccess.csproj --startup-project src/backend/TodoApp.Api/TodoApp.Api.csproj
 ```
 

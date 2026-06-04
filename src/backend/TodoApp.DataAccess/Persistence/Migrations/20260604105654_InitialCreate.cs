@@ -10,7 +10,7 @@ namespace TodoApp.DataAccess.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
+            // Intentionally empty baseline migration: establishes EF migrations history before entities are added.
         }
 
         /// <inheritdoc />
