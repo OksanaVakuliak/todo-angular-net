@@ -13,9 +13,14 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException(
-                "Connection string 'DefaultConnection' is missing from configuration.");
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Connection string 'DefaultConnection' is missing from configuration. " +
+                "Set it with the ConnectionStrings__DefaultConnection environment variable.");
+        }
 
         services.AddDbContext<TodoAppDbContext>(options =>
             options.UseSqlServer(

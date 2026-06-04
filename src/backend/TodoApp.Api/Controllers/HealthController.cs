@@ -12,7 +12,7 @@ public class HealthController(IHealthService healthService) : ControllerBase
     {
         var response = await healthService.GetHealthAsync(cancellationToken);
 
-        return response.Status == "ok"
+        return response.Status == ApplicationHealthStatuses.Ok
             ? Ok(response)
             : StatusCode(StatusCodes.Status503ServiceUnavailable, response);
     }

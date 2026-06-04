@@ -10,7 +10,9 @@ public class HealthService(IDatabaseHealthRepository databaseHealthRepository) :
         var databaseAvailable = await databaseHealthRepository.CanConnectAsync(cancellationToken);
 
         return new ApplicationHealthResult(
-            databaseAvailable ? "ok" : "degraded",
+            databaseAvailable
+                ? ApplicationHealthStatuses.Ok
+                : ApplicationHealthStatuses.Degraded,
             "TodoApp.Api",
             databaseAvailable ? "available" : "unavailable");
     }

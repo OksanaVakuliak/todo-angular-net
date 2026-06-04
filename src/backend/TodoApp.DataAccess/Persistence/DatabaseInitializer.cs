@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace TodoApp.DataAccess.Persistence;
 
@@ -11,7 +12,19 @@ public static class DatabaseInitializer
     {
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<TodoAppDbContext>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<TodoAppDbContext>>();
 
-        await dbContext.Database.MigrateAsync(cancellationToken);
+        try
+        {
+            await dbContext.Database.MigrateAsync(cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(
+                exception,
+                "Database initialization failed while applying EF Core migrations.");
+
+            throw;
+        }
     }
 }
