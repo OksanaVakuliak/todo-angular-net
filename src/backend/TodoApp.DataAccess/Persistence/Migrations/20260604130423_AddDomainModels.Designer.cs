@@ -12,7 +12,7 @@ using TodoApp.DataAccess.Persistence;
 namespace TodoApp.DataAccess.Persistence.Migrations
 {
     [DbContext(typeof(TodoAppDbContext))]
-    [Migration("20260604123521_AddDomainModels")]
+    [Migration("20260604130423_AddDomainModels")]
     partial class AddDomainModels
     {
         /// <inheritdoc />
@@ -169,7 +169,7 @@ namespace TodoApp.DataAccess.Persistence.Migrations
                     b.HasOne("TodoApp.DataAccess.Entities.Category", "Category")
                         .WithMany("Tasks")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("TodoApp.DataAccess.Entities.User", "User")
                         .WithMany("Tasks")

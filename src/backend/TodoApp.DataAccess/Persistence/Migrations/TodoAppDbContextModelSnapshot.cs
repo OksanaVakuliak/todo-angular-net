@@ -166,7 +166,7 @@ namespace TodoApp.DataAccess.Persistence.Migrations
                     b.HasOne("TodoApp.DataAccess.Entities.Category", "Category")
                         .WithMany("Tasks")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("TodoApp.DataAccess.Entities.User", "User")
                         .WithMany("Tasks")

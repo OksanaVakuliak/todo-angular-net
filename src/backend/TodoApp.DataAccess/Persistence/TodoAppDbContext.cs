@@ -93,7 +93,7 @@ public class TodoAppDbContext(DbContextOptions<TodoAppDbContext> options) : DbCo
             entity.HasOne(taskItem => taskItem.Category)
                 .WithMany(category => category.Tasks)
                 .HasForeignKey(taskItem => taskItem.CategoryId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
         });
     }
 

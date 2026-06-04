@@ -70,8 +70,7 @@ namespace TodoApp.DataAccess.Persistence.Migrations
                         name: "FK_TaskItems_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_TaskItems_Users_UserId",
                         column: x => x.UserId,
