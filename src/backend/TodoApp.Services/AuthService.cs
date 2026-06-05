@@ -79,15 +79,22 @@ public sealed class AuthService(
             return AuthOperationResult.Failure("user_not_found", "User was not found.");
         }
 
-        var authSession = await CreateAuthSessionAsync(user, cancellationToken);
-
-        await userSessionRepository.RevokeAsync(
+        var authSession = CreateAuthResponse(user);
+        var replacementSession = await userSessionRepository.RotateAsync(
             session.Id,
-            authSession.Session.Id,
+            new CreateUserSessionRecord(
+                user.Id,
+                refreshTokenService.Hash(authSession.RefreshToken),
+                authSession.RefreshTokenExpiresAt),
             DateTimeOffset.UtcNow,
             cancellationToken);
 
-        return AuthOperationResult.Success(authSession.Response);
+        if (replacementSession is null)
+        {
+            return AuthOperationResult.Failure("refresh_token_invalid", "Refresh token is invalid.");
+        }
+
+        return AuthOperationResult.Success(authSession);
     }
 
     public async Task LogoutAsync(string? refreshToken, CancellationToken cancellationToken)
@@ -124,25 +131,30 @@ public sealed class AuthService(
         AuthUserRecord user,
         CancellationToken cancellationToken)
     {
-        var accessToken = jwtTokenService.CreateToken(user);
-        var refreshToken = refreshTokenService.CreateToken();
-        var refreshTokenExpiresAt = DateTimeOffset.UtcNow.AddDays(jwtTokenService.GetRefreshTokenDays());
+        var response = CreateAuthResponse(user);
 
         var session = await userSessionRepository.CreateAsync(
             new CreateUserSessionRecord(
                 user.Id,
-                refreshTokenService.Hash(refreshToken),
-                refreshTokenExpiresAt),
+                refreshTokenService.Hash(response.RefreshToken),
+                response.RefreshTokenExpiresAt),
             cancellationToken);
 
-        return (
-            new AuthResponseDto(
-                accessToken.Token,
-                refreshToken,
-                accessToken.ExpiresAt,
-                refreshTokenExpiresAt,
-                ToUserDto(user)),
-            session);
+        return (response, session);
+    }
+
+    private AuthResponseDto CreateAuthResponse(AuthUserRecord user)
+    {
+        var accessToken = jwtTokenService.CreateToken(user);
+        var refreshToken = refreshTokenService.CreateToken();
+        var refreshTokenExpiresAt = DateTimeOffset.UtcNow.AddDays(jwtTokenService.GetRefreshTokenDays());
+
+        return new AuthResponseDto(
+            accessToken.Token,
+            refreshToken,
+            accessToken.ExpiresAt,
+            refreshTokenExpiresAt,
+            ToUserDto(user));
     }
 
     private static UserDto ToUserDto(AuthUserRecord user)

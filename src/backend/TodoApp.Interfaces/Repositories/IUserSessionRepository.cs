@@ -6,6 +6,12 @@ public interface IUserSessionRepository
         CreateUserSessionRecord session,
         CancellationToken cancellationToken);
 
+    Task<UserSessionRecord?> RotateAsync(
+        Guid currentSessionId,
+        CreateUserSessionRecord replacementSession,
+        DateTimeOffset revokedAt,
+        CancellationToken cancellationToken);
+
     Task<UserSessionRecord?> GetByRefreshTokenHashAsync(
         string refreshTokenHash,
         CancellationToken cancellationToken);
