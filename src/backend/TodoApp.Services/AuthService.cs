@@ -21,7 +21,9 @@ public sealed class AuthService(
 
         if (existingUser is not null)
         {
-            return AuthOperationResult.Failure("email_already_registered", "Email is already registered.");
+            return AuthOperationResult.Failure(
+                "email_already_registered",
+                "A user with this email already exists. Use a different email or sign in.");
         }
 
         var user = await userRepository.CreateAsync(
@@ -45,7 +47,9 @@ public sealed class AuthService(
 
         if (user is null || !passwordHasher.Verify(request.Password, user.PasswordHash))
         {
-            return AuthOperationResult.Failure("invalid_credentials", "Email or password is invalid.");
+            return AuthOperationResult.Failure(
+                "invalid_credentials",
+                "Email or password is incorrect. Check the credentials and try again.");
         }
 
         var authSession = await CreateAuthSessionAsync(user, cancellationToken);
@@ -59,7 +63,9 @@ public sealed class AuthService(
     {
         if (string.IsNullOrWhiteSpace(refreshToken))
         {
-            return AuthOperationResult.Failure("refresh_token_missing", "Refresh token is missing.");
+            return AuthOperationResult.Failure(
+                "refresh_token_missing",
+                "Refresh token cookie is missing. Sign in again.");
         }
 
         var refreshTokenHash = refreshTokenService.Hash(refreshToken);
@@ -69,14 +75,18 @@ public sealed class AuthService(
 
         if (session is null || session.RevokedAt is not null || session.ExpiresAt <= DateTimeOffset.UtcNow)
         {
-            return AuthOperationResult.Failure("refresh_token_invalid", "Refresh token is invalid.");
+            return AuthOperationResult.Failure(
+                "refresh_token_invalid",
+                "Refresh token is invalid, expired, or has already been used. Sign in again.");
         }
 
         var user = await userRepository.GetByIdAsync(session.UserId, cancellationToken);
 
         if (user is null)
         {
-            return AuthOperationResult.Failure("user_not_found", "User was not found.");
+            return AuthOperationResult.Failure(
+                "user_not_found",
+                "The session user no longer exists. Sign in again.");
         }
 
         var authSession = CreateAuthResponse(user);
@@ -91,7 +101,9 @@ public sealed class AuthService(
 
         if (replacementSession is null)
         {
-            return AuthOperationResult.Failure("refresh_token_invalid", "Refresh token is invalid.");
+            return AuthOperationResult.Failure(
+                "refresh_token_invalid",
+                "Refresh token is invalid, expired, or has already been used. Sign in again.");
         }
 
         return AuthOperationResult.Success(authSession);

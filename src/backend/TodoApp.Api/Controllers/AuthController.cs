@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TodoApp.Api.Authentication;
+using TodoApp.Api.Responses;
 using TodoApp.Interfaces.Dtos;
 using TodoApp.Interfaces.Services;
 
@@ -22,7 +23,7 @@ public class AuthController(
 
         if (!result.Succeeded || result.Response is null)
         {
-            return Conflict(new { result.ErrorCode, result.ErrorMessage });
+            return Conflict(CreateErrorResponse(result));
         }
 
         authCookieService.AppendAuthCookies(HttpContext, result.Response);
@@ -39,7 +40,7 @@ public class AuthController(
 
         if (!result.Succeeded || result.Response is null)
         {
-            return Unauthorized(new { result.ErrorCode, result.ErrorMessage });
+            return Unauthorized(CreateErrorResponse(result));
         }
 
         authCookieService.AppendAuthCookies(HttpContext, result.Response);
@@ -57,7 +58,7 @@ public class AuthController(
         {
             authCookieService.ClearAuthCookies(HttpContext);
 
-            return Unauthorized(new { result.ErrorCode, result.ErrorMessage });
+            return Unauthorized(CreateErrorResponse(result));
         }
 
         authCookieService.AppendAuthCookies(HttpContext, result.Response);
@@ -85,11 +86,24 @@ public class AuthController(
 
         if (!Guid.TryParse(userIdValue, out var userId))
         {
-            return Unauthorized();
+            return Unauthorized(new ApiErrorResponse(
+                "invalid_access_token",
+                "Access token is missing a valid user identifier. Sign in again."));
         }
 
         var user = await authService.GetCurrentUserAsync(userId, cancellationToken);
 
-        return user is null ? NotFound() : Ok(user);
+        return user is null
+            ? NotFound(new ApiErrorResponse(
+                "user_not_found",
+                "The authenticated user no longer exists. Sign in again."))
+            : Ok(user);
+    }
+
+    private static ApiErrorResponse CreateErrorResponse(AuthOperationResult result)
+    {
+        return new ApiErrorResponse(
+            result.ErrorCode ?? "auth_failed",
+            result.ErrorMessage ?? "Authentication request failed.");
     }
 }
