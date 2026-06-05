@@ -17,4 +17,6 @@ public class User
     public ICollection<TaskItem> Tasks { get; set; } = [];
 
     public ICollection<Category> Categories { get; set; } = [];
+
+    public ICollection<UserSession> Sessions { get; set; } = [];
 }

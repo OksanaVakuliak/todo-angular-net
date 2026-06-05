@@ -11,11 +11,14 @@ public class TodoAppDbContext(DbContextOptions<TodoAppDbContext> options) : DbCo
 
     public DbSet<Category> Categories => Set<Category>();
 
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         ConfigureUser(modelBuilder);
+        ConfigureUserSession(modelBuilder);
         ConfigureTaskItem(modelBuilder);
         ConfigureCategory(modelBuilder);
     }
@@ -51,6 +54,48 @@ public class TodoAppDbContext(DbContextOptions<TodoAppDbContext> options) : DbCo
 
             entity.Property(user => user.UpdatedAt)
                 .HasDefaultValueSql("SYSUTCDATETIME()");
+        });
+    }
+
+    private static void ConfigureUserSession(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserSession>(entity =>
+        {
+            entity.ToTable("UserSessions");
+
+            entity.HasKey(session => session.Id);
+
+            entity.Property(session => session.Id)
+                .HasDefaultValueSql("NEWID()");
+
+            entity.Property(session => session.RefreshTokenHash)
+                .IsRequired()
+                .HasMaxLength(512);
+
+            entity.HasIndex(session => session.RefreshTokenHash)
+                .IsUnique();
+
+            entity.Property(session => session.CreatedAt)
+                .HasDefaultValueSql("SYSUTCDATETIME()");
+
+            entity.Property(session => session.ExpiresAt)
+                .IsRequired();
+
+            entity.Property(session => session.RevokedAt);
+
+            entity.HasIndex(session => session.UserId);
+
+            entity.HasIndex(session => session.ExpiresAt);
+
+            entity.HasOne(session => session.User)
+                .WithMany(user => user.Sessions)
+                .HasForeignKey(session => session.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(session => session.ReplacedBySession)
+                .WithMany(session => session.ReplacementSessions)
+                .HasForeignKey(session => session.ReplacedBySessionId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
     }
 
