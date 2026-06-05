@@ -40,3 +40,49 @@ POST {{TodoApp.Api_HostAddress}}/api/auth/logout
 Accept: application/json
 
 ###
+
+@CategoryId = replace-with-category-id
+
+GET {{TodoApp.Api_HostAddress}}/api/categories
+Accept: application/json
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/categories
+Content-Type: application/json
+
+{
+  "name": "Work",
+  "color": "#2563eb"
+}
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/categories/{{CategoryId}}
+Accept: application/json
+
+###
+
+PATCH {{TodoApp.Api_HostAddress}}/api/categories/{{CategoryId}}
+Content-Type: application/json
+
+{
+  "color": "#16a34a"
+}
+
+###
+
+PATCH {{TodoApp.Api_HostAddress}}/api/categories/{{CategoryId}}
+Content-Type: application/json
+
+{
+  "name": "Personal",
+  "color": null
+}
+
+###
+
+DELETE {{TodoApp.Api_HostAddress}}/api/categories/{{CategoryId}}
+Accept: application/json
+
+###

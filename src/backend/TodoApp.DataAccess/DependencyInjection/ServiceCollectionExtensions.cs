@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
                 connectionString,
                 sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
         services.AddScoped<IDatabaseHealthRepository, DatabaseHealthRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
 
