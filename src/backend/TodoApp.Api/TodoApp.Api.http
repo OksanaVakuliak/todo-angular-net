@@ -4,3 +4,39 @@ GET {{TodoApp.Api_HostAddress}}/api/health
 Accept: application/json
 
 ###
+
+POST {{TodoApp.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "oksana@example.com",
+  "password": "ChangeMe123!",
+  "displayName": "Oksana"
+}
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "oksana@example.com",
+  "password": "ChangeMe123!"
+}
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/auth/me
+Accept: application/json
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/auth/refresh
+Accept: application/json
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/auth/logout
+Accept: application/json
+
+###
