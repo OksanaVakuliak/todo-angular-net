@@ -86,3 +86,54 @@ DELETE {{TodoApp.Api_HostAddress}}/api/categories/{{CategoryId}}
 Accept: application/json
 
 ###
+
+@TaskId = replace-with-task-id
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks
+Accept: application/json
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/tasks
+Content-Type: application/json
+
+{
+  "categoryId": "{{CategoryId}}",
+  "title": "Prepare weekly plan",
+  "description": "Review priorities and choose the next tasks.",
+  "dueAt": "2026-06-12T09:00:00+03:00"
+}
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks/{{TaskId}}
+Accept: application/json
+
+###
+
+PATCH {{TodoApp.Api_HostAddress}}/api/tasks/{{TaskId}}
+Content-Type: application/json
+
+{
+  "categoryId": null,
+  "title": "Prepare weekly plan",
+  "description": "Review priorities and choose the next tasks.",
+  "isCompleted": true,
+  "dueAt": null
+}
+
+###
+
+PATCH {{TodoApp.Api_HostAddress}}/api/tasks/{{TaskId}}
+Content-Type: application/json
+
+{
+  "isCompleted": true
+}
+
+###
+
+DELETE {{TodoApp.Api_HostAddress}}/api/tasks/{{TaskId}}
+Accept: application/json
+
+###
