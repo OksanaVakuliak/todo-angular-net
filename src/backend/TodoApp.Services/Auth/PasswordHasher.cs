@@ -39,20 +39,32 @@ public sealed class PasswordHasher : IPasswordHasher
         var parts = passwordHash.Split(Separator);
 
         if (parts is not ["PBKDF2-SHA256", var iterationsValue, var saltValue, var keyValue] ||
-            !int.TryParse(iterationsValue, out var iterations))
+            !int.TryParse(iterationsValue, out var iterations) ||
+            iterations <= 0)
         {
             return false;
         }
 
-        var salt = Convert.FromBase64String(saltValue);
-        var expectedKey = Convert.FromBase64String(keyValue);
-        var actualKey = Rfc2898DeriveBytes.Pbkdf2(
-            password,
-            salt,
-            iterations,
-            HashAlgorithmName.SHA256,
-            expectedKey.Length);
+        try
+        {
+            var salt = Convert.FromBase64String(saltValue);
+            var expectedKey = Convert.FromBase64String(keyValue);
+            var actualKey = Rfc2898DeriveBytes.Pbkdf2(
+                password,
+                salt,
+                iterations,
+                HashAlgorithmName.SHA256,
+                expectedKey.Length);
 
-        return CryptographicOperations.FixedTimeEquals(actualKey, expectedKey);
+            return CryptographicOperations.FixedTimeEquals(actualKey, expectedKey);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
     }
 }
