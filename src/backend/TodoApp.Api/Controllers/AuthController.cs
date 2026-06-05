@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TodoApp.Api.Authentication;
 using TodoApp.Interfaces.Dtos;
 using TodoApp.Interfaces.Services;
 
@@ -8,7 +9,9 @@ namespace TodoApp.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController(
+    IAuthService authService,
+    IAuthCookieService authCookieService) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<IActionResult> Register(
@@ -17,9 +20,14 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         var result = await authService.RegisterAsync(request, cancellationToken);
 
-        return result.Succeeded
-            ? CreatedAtAction(nameof(Me), result.Response)
-            : Conflict(new { result.ErrorCode, result.ErrorMessage });
+        if (!result.Succeeded || result.Response is null)
+        {
+            return Conflict(new { result.ErrorCode, result.ErrorMessage });
+        }
+
+        authCookieService.AppendAuthCookies(HttpContext, result.Response);
+
+        return CreatedAtAction(nameof(Me), new { result.Response.User });
     }
 
     [HttpPost("login")]
@@ -29,15 +37,42 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         var result = await authService.LoginAsync(request, cancellationToken);
 
-        return result.Succeeded
-            ? Ok(result.Response)
-            : Unauthorized(new { result.ErrorCode, result.ErrorMessage });
+        if (!result.Succeeded || result.Response is null)
+        {
+            return Unauthorized(new { result.ErrorCode, result.ErrorMessage });
+        }
+
+        authCookieService.AppendAuthCookies(HttpContext, result.Response);
+
+        return Ok(new { result.Response.User });
     }
 
-    [Authorize]
-    [HttpPost("logout")]
-    public IActionResult Logout()
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
     {
+        var refreshToken = authCookieService.GetRefreshToken(HttpContext);
+        var result = await authService.RefreshAsync(refreshToken ?? string.Empty, cancellationToken);
+
+        if (!result.Succeeded || result.Response is null)
+        {
+            authCookieService.ClearAuthCookies(HttpContext);
+
+            return Unauthorized(new { result.ErrorCode, result.ErrorMessage });
+        }
+
+        authCookieService.AppendAuthCookies(HttpContext, result.Response);
+
+        return Ok(new { result.Response.User });
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    {
+        await authService.LogoutAsync(
+            authCookieService.GetRefreshToken(HttpContext),
+            cancellationToken);
+        authCookieService.ClearAuthCookies(HttpContext);
+
         return NoContent();
     }
 

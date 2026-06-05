@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHealthService, HealthService>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IRefreshTokenService, RefreshTokenService>();
 
         return services;
     }

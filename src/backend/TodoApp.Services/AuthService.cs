@@ -7,8 +7,10 @@ namespace TodoApp.Services;
 
 public sealed class AuthService(
     IUserRepository userRepository,
+    IUserSessionRepository userSessionRepository,
     IPasswordHasher passwordHasher,
-    IJwtTokenService jwtTokenService) : IAuthService
+    IJwtTokenService jwtTokenService,
+    IRefreshTokenService refreshTokenService) : IAuthService
 {
     public async Task<AuthOperationResult> RegisterAsync(
         RegisterRequestDto request,
@@ -29,7 +31,9 @@ public sealed class AuthService(
                 request.DisplayName),
             cancellationToken);
 
-        return AuthOperationResult.Success(CreateAuthResponse(user));
+        var authSession = await CreateAuthSessionAsync(user, cancellationToken);
+
+        return AuthOperationResult.Success(authSession.Response);
     }
 
     public async Task<AuthOperationResult> LoginAsync(
@@ -44,7 +48,69 @@ public sealed class AuthService(
             return AuthOperationResult.Failure("invalid_credentials", "Email or password is invalid.");
         }
 
-        return AuthOperationResult.Success(CreateAuthResponse(user));
+        var authSession = await CreateAuthSessionAsync(user, cancellationToken);
+
+        return AuthOperationResult.Success(authSession.Response);
+    }
+
+    public async Task<AuthOperationResult> RefreshAsync(
+        string refreshToken,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            return AuthOperationResult.Failure("refresh_token_missing", "Refresh token is missing.");
+        }
+
+        var refreshTokenHash = refreshTokenService.Hash(refreshToken);
+        var session = await userSessionRepository.GetByRefreshTokenHashAsync(
+            refreshTokenHash,
+            cancellationToken);
+
+        if (session is null || session.RevokedAt is not null || session.ExpiresAt <= DateTimeOffset.UtcNow)
+        {
+            return AuthOperationResult.Failure("refresh_token_invalid", "Refresh token is invalid.");
+        }
+
+        var user = await userRepository.GetByIdAsync(session.UserId, cancellationToken);
+
+        if (user is null)
+        {
+            return AuthOperationResult.Failure("user_not_found", "User was not found.");
+        }
+
+        var authSession = await CreateAuthSessionAsync(user, cancellationToken);
+
+        await userSessionRepository.RevokeAsync(
+            session.Id,
+            authSession.Session.Id,
+            DateTimeOffset.UtcNow,
+            cancellationToken);
+
+        return AuthOperationResult.Success(authSession.Response);
+    }
+
+    public async Task LogoutAsync(string? refreshToken, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            return;
+        }
+
+        var session = await userSessionRepository.GetByRefreshTokenHashAsync(
+            refreshTokenService.Hash(refreshToken),
+            cancellationToken);
+
+        if (session is null || session.RevokedAt is not null)
+        {
+            return;
+        }
+
+        await userSessionRepository.RevokeAsync(
+            session.Id,
+            null,
+            DateTimeOffset.UtcNow,
+            cancellationToken);
     }
 
     public async Task<UserDto?> GetCurrentUserAsync(Guid userId, CancellationToken cancellationToken)
@@ -54,15 +120,29 @@ public sealed class AuthService(
         return user is null ? null : ToUserDto(user);
     }
 
-    private AuthResponseDto CreateAuthResponse(AuthUserRecord user)
+    private async Task<(AuthResponseDto Response, UserSessionRecord Session)> CreateAuthSessionAsync(
+        AuthUserRecord user,
+        CancellationToken cancellationToken)
     {
-        var token = jwtTokenService.CreateToken(user);
+        var accessToken = jwtTokenService.CreateToken(user);
+        var refreshToken = refreshTokenService.CreateToken();
+        var refreshTokenExpiresAt = DateTimeOffset.UtcNow.AddDays(jwtTokenService.GetRefreshTokenDays());
 
-        return new AuthResponseDto(
-            token.Token,
-            "Bearer",
-            token.ExpiresAt,
-            ToUserDto(user));
+        var session = await userSessionRepository.CreateAsync(
+            new CreateUserSessionRecord(
+                user.Id,
+                refreshTokenService.Hash(refreshToken),
+                refreshTokenExpiresAt),
+            cancellationToken);
+
+        return (
+            new AuthResponseDto(
+                accessToken.Token,
+                refreshToken,
+                accessToken.ExpiresAt,
+                refreshTokenExpiresAt,
+                ToUserDto(user)),
+            session);
     }
 
     private static UserDto ToUserDto(AuthUserRecord user)

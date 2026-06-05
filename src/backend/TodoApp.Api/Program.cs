@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using TodoApp.Api.Authentication;
 using TodoApp.DataAccess.DependencyInjection;
 using TodoApp.DataAccess.Persistence;
 using TodoApp.Services.DependencyInjection;
@@ -24,6 +25,7 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins("http://localhost:4200")
+            .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -43,10 +45,25 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
             ClockSkew = TimeSpan.FromMinutes(1)
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Cookies.TryGetValue(
+                    AuthCookieNames.AccessToken,
+                    out var accessToken))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     });
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IAuthCookieService, AuthCookieService>();
 builder.Services.AddApplicationServices();
 builder.Services.AddDataAccessServices(builder.Configuration);
 

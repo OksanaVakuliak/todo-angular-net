@@ -10,6 +10,8 @@ namespace TodoApp.Services.Auth;
 public interface IJwtTokenService
 {
     (string Token, DateTimeOffset ExpiresAt) CreateToken(AuthUserRecord user);
+
+    int GetRefreshTokenDays();
 }
 
 public sealed class JwtTokenService(IConfiguration configuration) : IJwtTokenService
@@ -24,6 +26,7 @@ public sealed class JwtTokenService(IConfiguration configuration) : IJwtTokenSer
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Name, user.DisplayName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -36,6 +39,11 @@ public sealed class JwtTokenService(IConfiguration configuration) : IJwtTokenSer
             signingCredentials: signingCredentials);
 
         return (new JwtSecurityTokenHandler().WriteToken(token), expiresAt);
+    }
+
+    public int GetRefreshTokenDays()
+    {
+        return GetOptions().RefreshTokenDays;
     }
 
     private JwtOptions GetOptions()
