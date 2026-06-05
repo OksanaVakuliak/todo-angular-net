@@ -178,6 +178,7 @@ public sealed class CategoriesController(ICategoryService categoryService) : Con
             "category_not_found" => new NotFoundObjectResult(response),
             "category_name_already_exists" => new ConflictObjectResult(response),
             "category_name_required" => new BadRequestObjectResult(response),
+            "category_patch_empty" => new BadRequestObjectResult(response),
             _ => new BadRequestObjectResult(response)
         };
     }

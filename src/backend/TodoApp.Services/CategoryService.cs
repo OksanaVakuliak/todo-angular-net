@@ -74,6 +74,13 @@ public sealed class CategoryService(ICategoryRepository categoryRepository) : IC
                 "Category was not found.");
         }
 
+        if (!request.HasName && !request.HasColor)
+        {
+            return CategoryOperationResult.Failure(
+                "category_patch_empty",
+                "Provide at least one category field to update.");
+        }
+
         var normalizedName = request.HasName
             ? request.Name?.Trim()
             : existingCategory.Name;
