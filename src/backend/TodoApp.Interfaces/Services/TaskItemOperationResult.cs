@@ -15,6 +15,8 @@ public sealed record TaskItemOperationResult(
 
     public static TaskItemOperationResult Success(TaskItemDto taskItem)
     {
+        ArgumentNullException.ThrowIfNull(taskItem);
+
         return new TaskItemOperationResult(true, taskItem, null, null);
     }
 
