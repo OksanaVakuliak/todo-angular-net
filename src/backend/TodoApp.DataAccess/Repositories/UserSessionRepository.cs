@@ -44,35 +44,40 @@ public class UserSessionRepository(TodoAppDbContext dbContext) : IUserSessionRep
         DateTimeOffset revokedAt,
         CancellationToken cancellationToken)
     {
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(
-            IsolationLevel.Serializable,
-            cancellationToken);
-        var currentSession = await dbContext.UserSessions
-            .SingleOrDefaultAsync(session => session.Id == currentSessionId, cancellationToken);
+        var executionStrategy = dbContext.Database.CreateExecutionStrategy();
 
-        if (currentSession is null ||
-            currentSession.RevokedAt is not null ||
-            currentSession.ExpiresAt <= DateTimeOffset.UtcNow)
+        return await executionStrategy.ExecuteAsync(async () =>
         {
-            return null;
-        }
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(
+                IsolationLevel.Serializable,
+                cancellationToken);
+            var currentSession = await dbContext.UserSessions
+                .SingleOrDefaultAsync(session => session.Id == currentSessionId, cancellationToken);
 
-        var replacementEntity = new UserSession
-        {
-            UserId = replacementSession.UserId,
-            RefreshTokenHash = replacementSession.RefreshTokenHash,
-            CreatedAt = DateTimeOffset.UtcNow,
-            ExpiresAt = replacementSession.ExpiresAt
-        };
+            if (currentSession is null ||
+                currentSession.RevokedAt is not null ||
+                currentSession.ExpiresAt <= DateTimeOffset.UtcNow)
+            {
+                return null;
+            }
 
-        dbContext.UserSessions.Add(replacementEntity);
-        currentSession.RevokedAt = revokedAt;
-        currentSession.ReplacedBySession = replacementEntity;
+            var replacementEntity = new UserSession
+            {
+                UserId = replacementSession.UserId,
+                RefreshTokenHash = replacementSession.RefreshTokenHash,
+                CreatedAt = DateTimeOffset.UtcNow,
+                ExpiresAt = replacementSession.ExpiresAt
+            };
 
-        await dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
+            dbContext.UserSessions.Add(replacementEntity);
+            currentSession.RevokedAt = revokedAt;
+            currentSession.ReplacedBySession = replacementEntity;
 
-        return ToRecord(replacementEntity);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return ToRecord(replacementEntity);
+        });
     }
 
     public async Task RevokeAsync(
