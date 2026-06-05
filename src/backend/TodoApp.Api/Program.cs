@@ -121,7 +121,10 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.EnableAnnotations();
+});
 builder.Services.AddSingleton<IAuthCookieService, AuthCookieService>();
 builder.Services.AddApplicationServices();
 builder.Services.AddDataAccessServices(builder.Configuration);
