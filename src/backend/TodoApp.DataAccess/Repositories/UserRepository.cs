@@ -11,9 +11,11 @@ public class UserRepository(TodoAppDbContext dbContext) : IUserRepository
         string email,
         CancellationToken cancellationToken)
     {
+        var normalizedEmail = NormalizeEmail(email);
+
         return await dbContext.Users
             .AsNoTracking()
-            .Where(user => user.Email == email)
+            .Where(user => user.Email == normalizedEmail)
             .Select(user => ToAuthUserRecord(user))
             .SingleOrDefaultAsync(cancellationToken);
     }
@@ -33,7 +35,7 @@ public class UserRepository(TodoAppDbContext dbContext) : IUserRepository
         CreateUserRecord user,
         CancellationToken cancellationToken)
     {
-        var normalizedEmail = user.Email.Trim().ToLowerInvariant();
+        var normalizedEmail = NormalizeEmail(user.Email);
         var now = DateTimeOffset.UtcNow;
         var entity = new User
         {
@@ -48,6 +50,11 @@ public class UserRepository(TodoAppDbContext dbContext) : IUserRepository
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return ToAuthUserRecord(entity);
+    }
+
+    private static string NormalizeEmail(string email)
+    {
+        return email.Trim().ToLowerInvariant();
     }
 
     private static AuthUserRecord ToAuthUserRecord(User user)
