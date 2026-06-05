@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using TodoApp.Api.Authentication;
 using TodoApp.Api.Responses;
 using TodoApp.DataAccess.DependencyInjection;
@@ -123,6 +124,12 @@ builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "TodoApp API",
+        Version = "v1",
+        Description = "Authentication uses HttpOnly cookies. Register and login set short-lived access and long-lived refresh cookies. Refresh rotates the refresh session and sets new cookies. Protected endpoints read the access token from the cookie; clients should not send JWTs in the response body or local storage."
+    });
     options.EnableAnnotations();
 });
 builder.Services.AddSingleton<IAuthCookieService, AuthCookieService>();
