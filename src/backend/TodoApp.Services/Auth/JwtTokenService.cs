@@ -48,15 +48,6 @@ public sealed class JwtTokenService(IConfiguration configuration) : IJwtTokenSer
 
     private JwtOptions GetOptions()
     {
-        var options = configuration
-            .GetSection(JwtOptions.SectionName)
-            .Get<JwtOptions>() ?? new JwtOptions();
-
-        if (string.IsNullOrWhiteSpace(options.SigningKey))
-        {
-            throw new InvalidOperationException("JWT signing key is missing from configuration.");
-        }
-
-        return options;
+        return JwtOptions.Bind(configuration);
     }
 }

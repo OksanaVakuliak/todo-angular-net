@@ -9,24 +9,16 @@ using TodoApp.Api.Authentication;
 using TodoApp.Api.Responses;
 using TodoApp.DataAccess.DependencyInjection;
 using TodoApp.DataAccess.Persistence;
+using TodoApp.Services.Auth;
 using TodoApp.Services.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-var jwtAudience = builder.Configuration["Jwt:Audience"];
-var jwtSigningKey = builder.Configuration["Jwt:SigningKey"];
+var jwtOptions = JwtOptions.Bind(builder.Configuration);
 var jsonSerializerOptions = new JsonSerializerOptions
 {
     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 };
-
-if (string.IsNullOrWhiteSpace(jwtSigningKey))
-{
-    throw new InvalidOperationException(
-        "JWT signing key is missing from configuration. " +
-        "Set it with the Jwt__SigningKey environment variable.");
-}
 
 builder.Services
     .AddControllers()
@@ -71,9 +63,9 @@ builder.Services
             ValidateAudience = true,
             ValidateIssuerSigningKey = true,
             ValidateLifetime = true,
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
+            ValidIssuer = jwtOptions.Issuer,
+            ValidAudience = jwtOptions.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
             ClockSkew = TimeSpan.FromMinutes(1)
         };
         options.Events = new JwtBearerEvents
