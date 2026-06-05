@@ -41,6 +41,7 @@ namespace TodoApp.DataAccess.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.UniqueConstraint("AK_Categories_UserId_Id", x => new { x.UserId, x.Id });
                     table.ForeignKey(
                         name: "FK_Categories_Users_UserId",
                         column: x => x.UserId,
@@ -67,10 +68,10 @@ namespace TodoApp.DataAccess.Persistence.Migrations
                 {
                     table.PrimaryKey("PK_TaskItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TaskItems_Categories_CategoryId",
-                        column: x => x.CategoryId,
+                        name: "FK_TaskItems_Categories_UserId_CategoryId",
+                        columns: x => new { x.UserId, x.CategoryId },
                         principalTable: "Categories",
-                        principalColumn: "Id");
+                        principalColumns: new[] { "UserId", "Id" });
                     table.ForeignKey(
                         name: "FK_TaskItems_Users_UserId",
                         column: x => x.UserId,
@@ -99,6 +100,11 @@ namespace TodoApp.DataAccess.Persistence.Migrations
                 name: "IX_TaskItems_UserId",
                 table: "TaskItems",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskItems_UserId_CategoryId",
+                table: "TaskItems",
+                columns: new[] { "UserId", "CategoryId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",

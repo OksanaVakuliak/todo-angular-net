@@ -92,7 +92,8 @@ public class TodoAppDbContext(DbContextOptions<TodoAppDbContext> options) : DbCo
 
             entity.HasOne(taskItem => taskItem.Category)
                 .WithMany(category => category.Tasks)
-                .HasForeignKey(taskItem => taskItem.CategoryId)
+                .HasPrincipalKey(category => new { category.UserId, category.Id })
+                .HasForeignKey(taskItem => new { taskItem.UserId, taskItem.CategoryId })
                 .OnDelete(DeleteBehavior.NoAction);
         });
     }
@@ -125,6 +126,8 @@ public class TodoAppDbContext(DbContextOptions<TodoAppDbContext> options) : DbCo
 
             entity.HasIndex(category => new { category.UserId, category.Name })
                 .IsUnique();
+
+            entity.HasAlternateKey(category => new { category.UserId, category.Id });
 
             entity.HasOne(category => category.User)
                 .WithMany(user => user.Categories)

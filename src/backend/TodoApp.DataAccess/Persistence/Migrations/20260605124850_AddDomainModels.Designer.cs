@@ -12,7 +12,7 @@ using TodoApp.DataAccess.Persistence;
 namespace TodoApp.DataAccess.Persistence.Migrations
 {
     [DbContext(typeof(TodoAppDbContext))]
-    [Migration("20260604130423_AddDomainModels")]
+    [Migration("20260605124850_AddDomainModels")]
     partial class AddDomainModels
     {
         /// <inheritdoc />
@@ -110,6 +110,8 @@ namespace TodoApp.DataAccess.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("UserId", "CategoryId");
+
                     b.ToTable("TaskItems", (string)null);
                 });
 
@@ -166,16 +168,17 @@ namespace TodoApp.DataAccess.Persistence.Migrations
 
             modelBuilder.Entity("TodoApp.DataAccess.Entities.TaskItem", b =>
                 {
-                    b.HasOne("TodoApp.DataAccess.Entities.Category", "Category")
-                        .WithMany("Tasks")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("TodoApp.DataAccess.Entities.User", "User")
                         .WithMany("Tasks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("TodoApp.DataAccess.Entities.Category", "Category")
+                        .WithMany("Tasks")
+                        .HasForeignKey("UserId", "CategoryId")
+                        .HasPrincipalKey("UserId", "Id")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Category");
 
