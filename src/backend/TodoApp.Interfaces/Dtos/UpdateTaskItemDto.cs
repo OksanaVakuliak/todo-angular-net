@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using TodoApp.Interfaces.Validation;
 
 namespace TodoApp.Interfaces.Dtos;
 
-public sealed class UpdateTaskItemDto
+public sealed class UpdateTaskItemDto : IValidatableObject
 {
     private Guid? categoryId;
     private string? title;
@@ -21,7 +22,8 @@ public sealed class UpdateTaskItemDto
         }
     }
 
-    [MaxLength(200)]
+    [NonWhiteSpaceIfProvided(ErrorMessage = "Task title cannot be empty.")]
+    [MaxLength(200, ErrorMessage = "Task title must be 200 characters or fewer.")]
     public string? Title
     {
         get => title;
@@ -32,7 +34,7 @@ public sealed class UpdateTaskItemDto
         }
     }
 
-    [MaxLength(2000)]
+    [MaxLength(2000, ErrorMessage = "Task description must be 2000 characters or fewer.")]
     public string? Description
     {
         get => description;
@@ -77,4 +79,31 @@ public sealed class UpdateTaskItemDto
 
     [JsonIgnore]
     public bool HasDueAt { get; private init; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (HasTitle && string.IsNullOrWhiteSpace(Title))
+        {
+            yield return new ValidationResult(
+                "Task title cannot be empty.",
+                [nameof(Title)]);
+        }
+
+        if (!HasCategoryId &&
+            !HasTitle &&
+            !HasDescription &&
+            !HasIsCompleted &&
+            !HasDueAt)
+        {
+            yield return new ValidationResult(
+                "Provide at least one task field to update.",
+                [
+                    nameof(CategoryId),
+                    nameof(Title),
+                    nameof(Description),
+                    nameof(IsCompleted),
+                    nameof(DueAt)
+                ]);
+        }
+    }
 }
