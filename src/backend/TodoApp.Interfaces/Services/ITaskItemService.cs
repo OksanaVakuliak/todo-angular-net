@@ -4,8 +4,9 @@ namespace TodoApp.Interfaces.Services;
 
 public interface ITaskItemService
 {
-    Task<IReadOnlyCollection<TaskItemDto>> ListAsync(
+    Task<PagedResultDto<TaskItemDto>> ListAsync(
         Guid userId,
+        TaskItemListQueryDto query,
         CancellationToken cancellationToken);
 
     Task<TaskItemDto?> GetAsync(
