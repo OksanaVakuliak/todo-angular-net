@@ -3,17 +3,22 @@ import { RouterLink } from '@angular/router';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
 
 @Component({
-  selector: 'app-login-page',
+  selector: 'app-register-page',
   standalone: true,
   imports: [PageIntroComponent, RouterLink],
   template: `
     <app-page-intro
       eyebrow="Authentication"
-      title="Sign in"
-      description="The authentication flow starts here. Form wiring, token handling, and route guards can attach to this page without changing the route structure."
+      title="Create account"
+      description="Registration starts here. The authentication milestone can wire this form to the API without changing the unauthenticated route structure."
     />
 
-    <form class="login-form">
+    <form class="auth-form">
+      <label>
+        Name
+        <input type="text" placeholder="Your name" autocomplete="name" />
+      </label>
+
       <label>
         Email
         <input type="email" placeholder="you@example.com" autocomplete="email" />
@@ -21,20 +26,20 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
 
       <label>
         Password
-        <input type="password" placeholder="Password" autocomplete="current-password" />
+        <input type="password" placeholder="Password" autocomplete="new-password" />
       </label>
 
-      <button type="button">Continue</button>
+      <button type="button">Create account</button>
     </form>
 
     <p class="auth-switch">
-      Need an account?
-      <a routerLink="/register">Create one</a>
+      Already have an account?
+      <a routerLink="/login">Sign in</a>
     </p>
   `,
   styles: [
     `
-      .login-form {
+      .auth-form {
         display: grid;
         gap: 1rem;
       }
@@ -84,4 +89,4 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
     `
   ]
 })
-export class LoginPageComponent {}
+export class RegisterPageComponent {}

@@ -6,10 +6,13 @@
       <a routerLink="/tasks" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
         Tasks
       </a>
-      <a routerLink="/categories" routerLinkActive="active">Categories</a>
+      <a routerLink="/tasks/new" routerLinkActive="active">New Task</a>
     </nav>
 
-    <a class="account-link" routerLink="/login">Sign in</a>
+    <div class="account-actions" aria-label="Account actions">
+      <a routerLink="/login">Sign in</a>
+      <a routerLink="/register">Sign up</a>
+    </div>
   </header>
 
   <main class="content">

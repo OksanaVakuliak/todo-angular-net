@@ -26,15 +26,22 @@ describe('ShellLayoutComponent', () => {
 
     expect(links).toEqual([
       { href: '/tasks', text: 'Tasks' },
-      { href: '/categories', text: 'Categories' }
+      { href: '/tasks/new', text: 'New Task' }
     ]);
   });
 
-  it('keeps sign in outside the primary navigation', () => {
+  it('keeps auth links outside the primary navigation', () => {
     const element = fixture.nativeElement as HTMLElement;
-    const accountLink = element.querySelector<HTMLAnchorElement>('.account-link');
+    const accountLinks = Array.from(
+      element.querySelectorAll<HTMLAnchorElement>('.account-actions a')
+    ).map((link) => ({
+      href: link.getAttribute('href'),
+      text: link.textContent?.trim()
+    }));
 
-    expect(accountLink?.getAttribute('href')).toBe('/login');
-    expect(accountLink?.textContent?.trim()).toBe('Sign in');
+    expect(accountLinks).toEqual([
+      { href: '/login', text: 'Sign in' },
+      { href: '/register', text: 'Sign up' }
+    ]);
   });
 });

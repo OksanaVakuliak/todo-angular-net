@@ -31,7 +31,7 @@
 }
 
 .nav a,
-.account-link {
+.account-actions a {
   border-radius: 0.5rem;
   color: #475569;
   font-weight: 700;
@@ -41,12 +41,15 @@
 
 .nav a.active,
 .nav a:hover,
-.account-link:hover {
+.account-actions a:hover {
   background: #e0f2fe;
   color: #075985;
 }
 
-.account-link {
+.account-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.25rem;
   justify-self: end;
 }
 
@@ -70,7 +73,7 @@
     width: 100%;
   }
 
-  .account-link {
+  .account-actions {
     justify-self: start;
   }
 
