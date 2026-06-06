@@ -82,6 +82,13 @@ public sealed class UpdateTaskItemDto : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+        if (HasTitle && string.IsNullOrWhiteSpace(Title))
+        {
+            yield return new ValidationResult(
+                "Task title cannot be empty.",
+                [nameof(Title)]);
+        }
+
         if (!HasCategoryId &&
             !HasTitle &&
             !HasDescription &&

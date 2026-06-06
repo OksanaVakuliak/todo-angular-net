@@ -40,6 +40,13 @@ public sealed class UpdateCategoryDto : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+        if (HasName && string.IsNullOrWhiteSpace(Name))
+        {
+            yield return new ValidationResult(
+                "Category name cannot be empty.",
+                [nameof(Name)]);
+        }
+
         if (!HasName && !HasColor)
         {
             yield return new ValidationResult(
