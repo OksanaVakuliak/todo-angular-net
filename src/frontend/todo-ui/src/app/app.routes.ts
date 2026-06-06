@@ -1,13 +1,27 @@
 import { Routes } from '@angular/router';
+import { AuthLayoutComponent } from './layout/auth-layout.component';
 import { ShellLayoutComponent } from './layout/shell-layout.component';
 
 export const routes: Routes = [
   {
-    path: 'login',
-    loadComponent: () =>
-      import('./features/auth/pages/login-page.component').then(
-        (module) => module.LoginPageComponent
-      )
+    path: '',
+    component: AuthLayoutComponent,
+    children: [
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./features/auth/pages/login-page.component').then(
+            (module) => module.LoginPageComponent
+          )
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./features/auth/pages/register-page.component').then(
+            (module) => module.RegisterPageComponent
+          )
+      }
+    ]
   },
   {
     path: '',
@@ -26,10 +40,10 @@ export const routes: Routes = [
           )
       },
       {
-        path: 'categories',
+        path: 'tasks/new',
         loadComponent: () =>
-          import('./features/categories/pages/categories-page.component').then(
-            (module) => module.CategoriesPageComponent
+          import('./features/tasks/pages/new-task-page.component').then(
+            (module) => module.NewTaskPageComponent
           )
       }
     ]

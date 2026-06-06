@@ -11,8 +11,8 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
   template: `
     <app-page-intro
       eyebrow="Tasks"
-      title="Task workspace scaffold"
-      description="This page will become the main task list with CRUD actions, pagination, search, and category filtering."
+      title="Tasks"
+      description="Main workspace route for the task list, filters, pagination, and task actions."
     />
 
     <section class="stack-status" aria-labelledby="stack-status-title">
@@ -20,28 +20,7 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
       <p>{{ healthStatus().message }}</p>
     </section>
   `,
-  styles: [
-    `
-    .stack-status {
-      margin-top: 1.5rem;
-      padding: 1rem 1.25rem;
-      border: 1px solid rgba(37, 99, 235, 0.15);
-      border-radius: 1rem;
-      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(15, 23, 42, 0.03));
-      color: #0f172a;
-    }
-
-    .stack-status h2 {
-      margin: 0 0 0.5rem;
-      font-size: 1rem;
-    }
-
-    .stack-status p {
-      margin: 0;
-      line-height: 1.5;
-    }
-  `
-  ]
+  styleUrl: './tasks-page.component.scss'
 })
 export class TasksPageComponent {
   private readonly httpClient = inject(HttpClient);

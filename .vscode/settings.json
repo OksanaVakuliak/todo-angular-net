@@ -1,3 +1,4 @@
 {
-  "dotnet.defaultSolution": "TodoApp.sln"
+  "dotnet.defaultSolution": "TodoApp.sln",
+  "commentTranslate.hover.enabled": false
 }

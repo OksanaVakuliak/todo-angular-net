@@ -1,0 +1,40 @@
+.auth-layout {
+  align-items: center;
+  background:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.18), transparent 34rem),
+    linear-gradient(135deg, #f8fafc 0%, #eef2ff 46%, #f0fdfa 100%);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.auth-panel {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 0.5rem;
+  box-shadow: 0 1.5rem 4rem rgba(15, 23, 42, 0.12);
+  max-width: 32rem;
+  padding: 2rem;
+  width: 100%;
+}
+
+.brand {
+  color: #0f172a;
+  display: inline-block;
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  text-decoration: none;
+}
+
+@media (max-width: 520px) {
+  .auth-layout {
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .auth-panel {
+    padding: 1.25rem;
+  }
+}
