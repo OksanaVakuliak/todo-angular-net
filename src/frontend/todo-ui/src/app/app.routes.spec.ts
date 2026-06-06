@@ -1,4 +1,5 @@
 import { routes } from './app.routes';
+import { authGuard, publicOnlyGuard } from './core/auth/auth.guards';
 import { AuthLayoutComponent } from './layout/auth-layout.component';
 import { ShellLayoutComponent } from './layout/shell-layout.component';
 
@@ -12,6 +13,7 @@ describe('routes', () => {
     expect(loginRoute?.loadComponent).toEqual(jasmine.any(Function));
     expect(registerRoute).toBeDefined();
     expect(registerRoute?.loadComponent).toEqual(jasmine.any(Function));
+    expect(authRoute?.canActivateChild).toEqual([publicOnlyGuard]);
   });
 
   it('registers task list and task creation under the application shell layout', () => {
@@ -22,6 +24,7 @@ describe('routes', () => {
     expect(childPaths).toContain('tasks');
     expect(childPaths).toContain('tasks/new');
     expect(childPaths).not.toContain('categories');
+    expect(shellRoute?.canActivateChild).toEqual([authGuard]);
   });
 
   it('redirects empty and unknown routes to tasks', () => {

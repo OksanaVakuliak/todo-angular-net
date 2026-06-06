@@ -31,9 +31,12 @@
 }
 
 .nav a,
-.account-actions a {
+.account-actions button {
+  border: 0;
   border-radius: 0.5rem;
   color: #475569;
+  cursor: pointer;
+  font: inherit;
   font-weight: 700;
   padding: 0.65rem 0.9rem;
   text-decoration: none;
@@ -41,7 +44,7 @@
 
 .nav a.active,
 .nav a:hover,
-.account-actions a:hover {
+.account-actions button:hover {
   background: #e0f2fe;
   color: #075985;
 }
@@ -51,6 +54,12 @@
   display: flex;
   gap: 0.25rem;
   justify-self: end;
+}
+
+.account-name {
+  color: #334155;
+  font-weight: 800;
+  padding: 0.65rem 0.4rem;
 }
 
 .content {

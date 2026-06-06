@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { ShellLayoutComponent } from './shell-layout.component';
 
@@ -8,7 +9,7 @@ describe('ShellLayoutComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ShellLayoutComponent],
-      providers: [provideRouter([])]
+      providers: [provideHttpClient(), provideRouter([])]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ShellLayoutComponent);
@@ -30,18 +31,10 @@ describe('ShellLayoutComponent', () => {
     ]);
   });
 
-  it('keeps auth links outside the primary navigation', () => {
+  it('keeps account actions outside the primary navigation', () => {
     const element = fixture.nativeElement as HTMLElement;
-    const accountLinks = Array.from(
-      element.querySelectorAll<HTMLAnchorElement>('.account-actions a')
-    ).map((link) => ({
-      href: link.getAttribute('href'),
-      text: link.textContent?.trim()
-    }));
+    const accountButton = element.querySelector<HTMLButtonElement>('.account-actions button');
 
-    expect(accountLinks).toEqual([
-      { href: '/login', text: 'Sign in' },
-      { href: '/register', text: 'Sign up' }
-    ]);
+    expect(accountButton?.textContent?.trim()).toBe('Sign out');
   });
 });
