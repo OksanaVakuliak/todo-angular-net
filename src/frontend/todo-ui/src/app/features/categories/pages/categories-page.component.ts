@@ -8,8 +8,8 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
   template: `
     <app-page-intro
       eyebrow="Categories"
-      title="Categories management scaffold"
-      description="This page will contain category CRUD and category assignment helpers for tasks."
+      title="Categories"
+      description="Management route for category CRUD and task assignment helpers."
     />
   `
 })

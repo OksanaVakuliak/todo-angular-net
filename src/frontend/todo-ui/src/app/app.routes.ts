@@ -1,13 +1,20 @@
 import { Routes } from '@angular/router';
+import { AuthLayoutComponent } from './layout/auth-layout.component';
 import { ShellLayoutComponent } from './layout/shell-layout.component';
 
 export const routes: Routes = [
   {
-    path: 'login',
-    loadComponent: () =>
-      import('./features/auth/pages/login-page.component').then(
-        (module) => module.LoginPageComponent
-      )
+    path: '',
+    component: AuthLayoutComponent,
+    children: [
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./features/auth/pages/login-page.component').then(
+            (module) => module.LoginPageComponent
+          )
+      }
+    ]
   },
   {
     path: '',

@@ -1,13 +1,16 @@
 <div class="shell">
-  <aside class="sidebar">
-    <a class="brand" routerLink="/tasks">To-Do App</a>
+  <header class="topbar">
+    <a class="brand" routerLink="/tasks" aria-label="To-Do App home">To-Do App</a>
 
     <nav class="nav">
-      <a routerLink="/tasks" routerLinkActive="active">Tasks</a>
+      <a routerLink="/tasks" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        Tasks
+      </a>
       <a routerLink="/categories" routerLinkActive="active">Categories</a>
-      <a routerLink="/login" routerLinkActive="active">Login</a>
     </nav>
-  </aside>
+
+    <a class="account-link" routerLink="/login">Sign in</a>
+  </header>
 
   <main class="content">
     <router-outlet></router-outlet>
