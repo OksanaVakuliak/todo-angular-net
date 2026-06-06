@@ -15,11 +15,15 @@ export const authCredentialsInterceptor: HttpInterceptorFn = (request, next) => 
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse && error.status === 401 && isApiRequest && !isAuthEndpoint) {
         authService.clearSession();
-        void router.navigate(['/login']);
+        void router.navigate(['/login'], {
+          queryParams: {
+            returnUrl: router.url,
+            reason: 'session-expired'
+          }
+        });
       }
 
       return throwError(() => error);
     })
   );
 };
-

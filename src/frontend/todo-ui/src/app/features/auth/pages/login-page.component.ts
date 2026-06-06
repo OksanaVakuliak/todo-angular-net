@@ -16,6 +16,10 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
       description="Sign in to manage your tasks and keep your session active through secure cookies."
     />
 
+    @if (sessionMessage) {
+      <p class="form-notice" role="status">{{ sessionMessage }}</p>
+    }
+
     <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
       <label>
         Email
@@ -58,6 +62,10 @@ export class LoginPageComponent {
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]]
   });
+  protected readonly sessionMessage =
+    this.route.snapshot.queryParamMap.get('reason') === 'session-expired'
+      ? 'Your session expired. Sign in again to continue.'
+      : '';
   protected errorMessage = '';
   protected isSubmitting = false;
 

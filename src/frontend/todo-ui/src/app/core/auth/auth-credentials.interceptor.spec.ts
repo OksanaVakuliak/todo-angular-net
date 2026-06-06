@@ -50,6 +50,7 @@ describe('authCredentialsInterceptor', () => {
 
   it('clears session and redirects to login for protected API unauthorized responses', () => {
     spyOn(authService, 'clearSession');
+    spyOnProperty(router, 'url', 'get').and.returnValue('/tasks');
     spyOn(router, 'navigate').and.resolveTo(true);
 
     httpClient.get('/api/tasks').subscribe({
@@ -61,7 +62,11 @@ describe('authCredentialsInterceptor', () => {
       .flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
 
     expect(authService.clearSession).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    expect(router.navigate).toHaveBeenCalledWith(['/login'], {
+      queryParams: {
+        returnUrl: '/tasks',
+        reason: 'session-expired'
+      }
+    });
   });
 });
-

@@ -87,6 +87,6 @@ export class AuthService {
   private setSession(user: User | null): void {
     this.currentUserSignal.set(user);
     this.statusSignal.set(user ? 'authenticated' : 'anonymous');
+    this.sessionLoaded = true;
   }
 }
-
