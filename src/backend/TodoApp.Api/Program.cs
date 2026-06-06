@@ -1,11 +1,10 @@
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using TodoApp.Api.Authentication;
+using TodoApp.Api.Middleware;
 using TodoApp.Api.Responses;
 using TodoApp.DataAccess.DependencyInjection;
 using TodoApp.DataAccess.Persistence;
@@ -14,33 +13,13 @@ using TodoApp.Services.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 var jwtOptions = JwtOptions.Bind(builder.Configuration);
-var jsonSerializerOptions = new JsonSerializerOptions
-{
-    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-};
+var jsonSerializerOptions = ApiJsonSerializerOptions.Default;
 
 builder.Services
     .AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {
-        options.InvalidModelStateResponseFactory = context =>
-        {
-            var errors = context.ModelState
-                .Where(entry => entry.Value?.Errors.Count > 0)
-                .ToDictionary(
-                    entry => string.IsNullOrWhiteSpace(entry.Key) ? "request" : entry.Key,
-                    entry => entry.Value!.Errors
-                        .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage)
-                            ? "The value is invalid."
-                            : error.ErrorMessage)
-                        .ToArray());
-
-            return new BadRequestObjectResult(new ApiValidationErrorResponse(
-                "validation_failed",
-                "Request validation failed. Check the errors object for field-level details.",
-                errors));
-        };
+        options.InvalidModelStateResponseFactory = ApiValidationErrorResponseFactory.Create;
     });
 builder.Services.AddCors(options =>
 {
@@ -137,6 +116,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ApiExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
