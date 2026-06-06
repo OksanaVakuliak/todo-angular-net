@@ -14,12 +14,12 @@ public static class ApiValidationErrorResponseFactory
     {
         var errors = modelState
             .Where(entry => entry.Value?.Errors.Count > 0)
+            .GroupBy(entry => NormalizeFieldName(entry.Key))
             .ToDictionary(
-                entry => NormalizeFieldName(entry.Key),
-                entry => entry.Value!.Errors
-                    .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage)
-                        ? "The value is invalid."
-                        : error.ErrorMessage)
+                group => group.Key,
+                group => group
+                    .SelectMany(entry => entry.Value!.Errors)
+                    .Select(GetErrorMessage)
                     .Distinct()
                     .ToArray());
 
@@ -34,5 +34,12 @@ public static class ApiValidationErrorResponseFactory
         return string.IsNullOrWhiteSpace(fieldName)
             ? "request"
             : char.ToLowerInvariant(fieldName[0]) + fieldName[1..];
+    }
+
+    private static string GetErrorMessage(ModelError error)
+    {
+        return string.IsNullOrWhiteSpace(error.ErrorMessage)
+            ? "The value is invalid."
+            : error.ErrorMessage;
     }
 }
