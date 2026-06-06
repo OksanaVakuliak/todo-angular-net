@@ -7,16 +7,36 @@ namespace TodoApp.DataAccess.Repositories;
 
 public sealed class TaskItemRepository(TodoAppDbContext dbContext) : ITaskItemRepository
 {
-    public async Task<IReadOnlyCollection<TaskItemRecord>> ListByUserAsync(
+    public async Task<TaskItemListResultRecord> ListByUserAsync(
         Guid userId,
+        TaskItemListQueryRecord query,
         CancellationToken cancellationToken)
     {
-        return await dbContext.TaskItems
+        var taskItemsQuery = dbContext.TaskItems
             .AsNoTracking()
-            .Where(taskItem => taskItem.UserId == userId)
+            .Where(taskItem => taskItem.UserId == userId);
+
+        if (query.CategoryId.HasValue)
+        {
+            taskItemsQuery = taskItemsQuery
+                .Where(taskItem => taskItem.CategoryId == query.CategoryId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            taskItemsQuery = taskItemsQuery
+                .Where(taskItem =>
+                    taskItem.Title.Contains(query.Search) ||
+                    (taskItem.Description != null && taskItem.Description.Contains(query.Search)));
+        }
+
+        var totalItems = await taskItemsQuery.CountAsync(cancellationToken);
+        var items = await taskItemsQuery
             .OrderBy(taskItem => taskItem.IsCompleted)
             .ThenBy(taskItem => taskItem.DueAt)
             .ThenByDescending(taskItem => taskItem.CreatedAt)
+            .Skip((query.Page - 1) * query.Limit)
+            .Take(query.Limit)
             .Select(taskItem => new TaskItemRecord(
                 taskItem.Id,
                 taskItem.UserId,
@@ -29,6 +49,8 @@ public sealed class TaskItemRepository(TodoAppDbContext dbContext) : ITaskItemRe
                 taskItem.CreatedAt,
                 taskItem.UpdatedAt))
             .ToListAsync(cancellationToken);
+
+        return new TaskItemListResultRecord(items, totalItems);
     }
 
     public async Task<TaskItemRecord?> GetByIdAsync(

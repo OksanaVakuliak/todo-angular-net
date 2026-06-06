@@ -2,8 +2,9 @@ namespace TodoApp.Interfaces.Repositories;
 
 public interface ITaskItemRepository
 {
-    Task<IReadOnlyCollection<TaskItemRecord>> ListByUserAsync(
+    Task<TaskItemListResultRecord> ListByUserAsync(
         Guid userId,
+        TaskItemListQueryRecord query,
         CancellationToken cancellationToken);
 
     Task<TaskItemRecord?> GetByIdAsync(

@@ -94,6 +94,26 @@ Accept: application/json
 
 ###
 
+GET {{TodoApp.Api_HostAddress}}/api/tasks?page=1&limit=10
+Accept: application/json
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks?search=weekly
+Accept: application/json
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks?categoryId={{CategoryId}}
+Accept: application/json
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks?page=1&limit=10&search=weekly&categoryId={{CategoryId}}
+Accept: application/json
+
+###
+
 POST {{TodoApp.Api_HostAddress}}/api/tasks
 Content-Type: application/json
 

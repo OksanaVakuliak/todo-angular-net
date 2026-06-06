@@ -17,17 +17,23 @@ public sealed class TasksController(ITaskItemService taskItemService) : Controll
     [HttpGet]
     [SwaggerOperation(
         Summary = "List tasks",
-        Description = "Returns tasks owned by the authenticated user.")]
-    [ProducesResponseType(typeof(IReadOnlyCollection<TaskItemDto>), StatusCodes.Status200OK)]
+        Description = "Returns paged tasks owned by the authenticated user, with optional search and category filtering.")]
+    [ProducesResponseType(typeof(PagedResultDto<TaskItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiValidationErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> List(CancellationToken cancellationToken)
+    public async Task<IActionResult> List(
+        [FromQuery] TaskItemListQueryDto query,
+        CancellationToken cancellationToken)
     {
         if (!TryGetCurrentUserId(out var userId, out var errorResponse))
         {
             return Unauthorized(errorResponse);
         }
 
-        var taskItems = await taskItemService.ListAsync(userId, cancellationToken);
+        var taskItems = await taskItemService.ListAsync(
+            userId,
+            query,
+            cancellationToken);
 
         return Ok(taskItems);
     }

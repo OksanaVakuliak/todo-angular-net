@@ -8,13 +8,30 @@ public sealed class TaskItemService(
     ITaskItemRepository taskItemRepository,
     ICategoryRepository categoryRepository) : ITaskItemService
 {
-    public async Task<IReadOnlyCollection<TaskItemDto>> ListAsync(
+    public async Task<PagedResultDto<TaskItemDto>> ListAsync(
         Guid userId,
+        TaskItemListQueryDto query,
         CancellationToken cancellationToken)
     {
-        var taskItems = await taskItemRepository.ListByUserAsync(userId, cancellationToken);
+        var normalizedQuery = new TaskItemListQueryRecord(
+            Math.Max(query.Page, 1),
+            Math.Clamp(query.Limit, 1, 100),
+            NormalizeOptionalText(query.Search),
+            query.CategoryId);
 
-        return taskItems.Select(ToTaskItemDto).ToArray();
+        var taskItems = await taskItemRepository.ListByUserAsync(
+            userId,
+            normalizedQuery,
+            cancellationToken);
+        var items = taskItems.Items.Select(ToTaskItemDto).ToArray();
+        var totalPages = CalculateTotalPages(taskItems.TotalItems, normalizedQuery.Limit);
+
+        return new PagedResultDto<TaskItemDto>(
+            items,
+            normalizedQuery.Page,
+            normalizedQuery.Limit,
+            taskItems.TotalItems,
+            totalPages);
     }
 
     public async Task<TaskItemDto?> GetAsync(
@@ -178,5 +195,19 @@ public sealed class TaskItemService(
             taskItem.DueAt,
             taskItem.CreatedAt,
             taskItem.UpdatedAt);
+    }
+
+    private static string? NormalizeOptionalText(string? value)
+    {
+        var trimmed = value?.Trim();
+
+        return string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
+    }
+
+    private static int CalculateTotalPages(int totalItems, int limit)
+    {
+        return totalItems == 0
+            ? 0
+            : (int)Math.Ceiling(totalItems / (double)limit);
     }
 }
