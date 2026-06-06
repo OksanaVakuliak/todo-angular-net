@@ -20,28 +20,7 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
       <p>{{ healthStatus().message }}</p>
     </section>
   `,
-  styles: [
-    `
-    .stack-status {
-      margin-top: 1.5rem;
-      padding: 1rem 1.25rem;
-      border: 1px solid rgba(37, 99, 235, 0.15);
-      border-radius: 0.5rem;
-      background: #ffffff;
-      color: #0f172a;
-    }
-
-    .stack-status h2 {
-      margin: 0 0 0.5rem;
-      font-size: 1rem;
-    }
-
-    .stack-status p {
-      margin: 0;
-      line-height: 1.5;
-    }
-  `
-  ]
+  styleUrl: './tasks-page.component.scss'
 })
 export class TasksPageComponent {
   private readonly httpClient = inject(HttpClient);
