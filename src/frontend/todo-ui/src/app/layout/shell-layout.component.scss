@@ -49,6 +49,14 @@
   color: #075985;
 }
 
+.brand:focus-visible,
+.nav a:focus-visible,
+.account-actions button:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.18);
+  outline: 2px solid #0ea5e9;
+  outline-offset: 0.2rem;
+}
+
 .account-actions {
   align-items: center;
   display: flex;
@@ -83,7 +91,18 @@
   }
 
   .account-actions {
+    flex-wrap: wrap;
     justify-self: start;
+    width: 100%;
+  }
+
+  .account-name {
+    flex: 1 1 12rem;
+    padding-left: 0;
+  }
+
+  .account-actions button {
+    flex: 0 0 auto;
   }
 
   .content {

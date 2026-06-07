@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, HostListener, input, output } from '@angular/core';
 
 let nextDialogId = 0;
 
@@ -53,6 +53,13 @@ export class ConfirmationDialogComponent {
 
   readonly cancelled = output<void>();
   readonly confirmed = output<void>();
+
+  @HostListener('document:keydown.escape')
+  protected closeOnEscape(): void {
+    if (this.isOpen()) {
+      this.cancel();
+    }
+  }
 
   protected cancel(): void {
     if (this.isBusy()) {

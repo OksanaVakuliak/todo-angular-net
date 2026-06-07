@@ -84,6 +84,13 @@
   background: #f1f5f9;
 }
 
+.secondary-button:focus-visible,
+.danger-button:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.18);
+  outline: 2px solid #0ea5e9;
+  outline-offset: 0.2rem;
+}
+
 .danger-button {
   background: #b91c1c;
   border: 1px solid #b91c1c;
