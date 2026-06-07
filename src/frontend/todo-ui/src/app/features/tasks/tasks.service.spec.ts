@@ -1,7 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { Category, PagedResult, TaskItem } from './task.models';
+import { Category } from '../categories/category.models';
+import { PagedResult, TaskItem } from './task.models';
 import { TasksService } from './tasks.service';
 
 describe('TasksService', () => {
@@ -109,15 +110,5 @@ describe('TasksService', () => {
     request.flush(null);
 
     expect(requestCompleted).toBeTrue();
-  });
-
-  it('lists categories for task forms and filters', () => {
-    service.listCategories().subscribe((result) => {
-      expect(result).toEqual([category]);
-    });
-
-    const request = httpTestingController.expectOne('/api/categories');
-    expect(request.request.method).toBe('GET');
-    request.flush([category]);
   });
 });

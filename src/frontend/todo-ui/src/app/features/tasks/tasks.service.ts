@@ -1,14 +1,7 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import {
-  Category,
-  CreateTaskRequest,
-  PagedResult,
-  TaskItem,
-  TaskListQuery,
-  UpdateTaskRequest
-} from './task.models';
+import { CreateTaskRequest, PagedResult, TaskItem, TaskListQuery, UpdateTaskRequest } from './task.models';
 
 @Injectable({
   providedIn: 'root'
@@ -46,10 +39,6 @@ export class TasksService {
 
   deleteTask(taskId: string): Observable<void> {
     return this.httpClient.delete<void>(`/api/tasks/${taskId}`);
-  }
-
-  listCategories(): Observable<Category[]> {
-    return this.httpClient.get<Category[]>('/api/categories');
   }
 
   getErrorMessage(error: unknown, fallback: string): string {

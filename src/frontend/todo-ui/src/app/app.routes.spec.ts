@@ -16,7 +16,7 @@ describe('routes', () => {
     expect(authRoute?.canActivateChild).toEqual([publicOnlyGuard]);
   });
 
-  it('registers task list, task creation, and task editing under the application shell layout', () => {
+  it('registers tasks and categories under the application shell layout', () => {
     const shellRoute = routes.find((route) => route.component === ShellLayoutComponent);
     const childPaths = shellRoute?.children?.map((route) => route.path);
 
@@ -24,7 +24,7 @@ describe('routes', () => {
     expect(childPaths).toContain('tasks');
     expect(childPaths).toContain('tasks/new');
     expect(childPaths).toContain('tasks/:taskId/edit');
-    expect(childPaths).not.toContain('categories');
+    expect(childPaths).toContain('categories');
     expect(shellRoute?.canActivateChild).toEqual([authGuard]);
   });
 

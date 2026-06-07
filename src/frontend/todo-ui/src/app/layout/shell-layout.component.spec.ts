@@ -27,7 +27,8 @@ describe('ShellLayoutComponent', () => {
 
     expect(links).toEqual([
       { href: '/tasks', text: 'Tasks' },
-      { href: '/tasks/new', text: 'New Task' }
+      { href: '/tasks/new', text: 'New Task' },
+      { href: '/categories', text: 'Categories' }
     ]);
   });
 
