@@ -69,4 +69,21 @@ describe('authCredentialsInterceptor', () => {
       }
     });
   });
+
+  it('does not clear session or redirect for auth endpoint unauthorized responses', () => {
+    spyOn(authService, 'clearSession');
+    spyOnProperty(router, 'url', 'get').and.returnValue('/tasks');
+    spyOn(router, 'navigate').and.resolveTo(true);
+
+    httpClient.get('/api/auth/refresh').subscribe({
+      error: () => undefined
+    });
+
+    httpTestingController
+      .expectOne('/api/auth/refresh')
+      .flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+
+    expect(authService.clearSession).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
 });

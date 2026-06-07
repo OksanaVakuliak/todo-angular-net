@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { catchError, finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
+import { catchError, defer, finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { AuthStatus, AuthUserResponse, LoginRequest, RegisterRequest, User } from './auth.models';
 
 @Injectable({
@@ -12,6 +12,7 @@ export class AuthService {
   private readonly statusSignal = signal<AuthStatus>('checking');
   private sessionRequest?: Observable<User | null>;
   private sessionLoaded = false;
+  private sessionVersion = 0;
 
   readonly currentUser = this.currentUserSignal.asReadonly();
   readonly status = this.statusSignal.asReadonly();
@@ -26,14 +27,18 @@ export class AuthService {
       return this.sessionRequest;
     }
 
+    const version = this.sessionVersion;
     this.statusSignal.set('checking');
     this.sessionRequest = this.httpClient.get<User>('/api/auth/me').pipe(
+      tap((user) => this.setSessionIfCurrent(version, user)),
       catchError((error: HttpErrorResponse) =>
-        error.status === 401 ? this.refreshSession() : of(null)
+        error.status === 401 ? this.refreshSession() : this.clearSessionIfCurrent(version)
       ),
-      tap((user) => this.setSession(user)),
       finalize(() => {
-        this.sessionLoaded = true;
+        if (version === this.sessionVersion) {
+          this.sessionLoaded = true;
+        }
+
         this.sessionRequest = undefined;
       }),
       shareReplay(1)
@@ -43,30 +48,41 @@ export class AuthService {
   }
 
   login(request: LoginRequest): Observable<User> {
-    return this.httpClient.post<AuthUserResponse>('/api/auth/login', request).pipe(
-      map((response) => response.user),
-      tap((user) => this.setSession(user))
-    );
+    return defer(() => {
+      const version = this.beginSessionMutation();
+
+      return this.httpClient.post<AuthUserResponse>('/api/auth/login', request).pipe(
+        map((response) => response.user),
+        tap((user) => this.setSessionIfCurrent(version, user))
+      );
+    });
   }
 
   register(request: RegisterRequest): Observable<User> {
-    return this.httpClient.post<AuthUserResponse>('/api/auth/register', request).pipe(
-      map((response) => response.user),
-      tap((user) => this.setSession(user))
-    );
+    return defer(() => {
+      const version = this.beginSessionMutation();
+
+      return this.httpClient.post<AuthUserResponse>('/api/auth/register', request).pipe(
+        map((response) => response.user),
+        tap((user) => this.setSessionIfCurrent(version, user))
+      );
+    });
   }
 
   logout(): Observable<void> {
-    return this.httpClient.post<void>('/api/auth/logout', {}).pipe(
-      catchError(() => of(undefined)),
-      tap(() => this.clearSession())
-    );
+    return defer(() => {
+      const version = this.beginSessionMutation();
+
+      return this.httpClient.post<void>('/api/auth/logout', {}).pipe(
+        catchError(() => of(undefined)),
+        tap(() => this.clearSessionIfCurrent(version))
+      );
+    });
   }
 
   clearSession(): void {
-    this.currentUserSignal.set(null);
-    this.statusSignal.set('anonymous');
-    this.sessionLoaded = true;
+    const version = this.beginSessionMutation();
+    this.clearSessionIfCurrent(version);
   }
 
   getErrorMessage(error: unknown, fallback: string): string {
@@ -78,13 +94,39 @@ export class AuthService {
   }
 
   private refreshSession(): Observable<User | null> {
-    return this.httpClient.post<AuthUserResponse>('/api/auth/refresh', {}).pipe(
-      map((response) => response.user),
-      catchError(() => of(null))
-    );
+    return defer(() => {
+      const version = this.beginSessionMutation();
+
+      return this.httpClient.post<AuthUserResponse>('/api/auth/refresh', {}).pipe(
+        map((response) => response.user),
+        tap((user) => this.setSessionIfCurrent(version, user)),
+        catchError(() => this.clearSessionIfCurrent(version))
+      );
+    });
   }
 
-  private setSession(user: User | null): void {
+  private beginSessionMutation(): number {
+    this.sessionVersion += 1;
+    this.sessionRequest = undefined;
+
+    return this.sessionVersion;
+  }
+
+  private clearSessionIfCurrent(version: number): Observable<null> {
+    if (version === this.sessionVersion) {
+      this.currentUserSignal.set(null);
+      this.statusSignal.set('anonymous');
+      this.sessionLoaded = true;
+    }
+
+    return of(null);
+  }
+
+  private setSessionIfCurrent(version: number, user: User | null): void {
+    if (version !== this.sessionVersion) {
+      return;
+    }
+
     this.currentUserSignal.set(user);
     this.statusSignal.set(user ? 'authenticated' : 'anonymous');
     this.sessionLoaded = true;

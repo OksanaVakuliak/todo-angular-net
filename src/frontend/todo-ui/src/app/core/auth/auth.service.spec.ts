@@ -12,6 +12,13 @@ describe('AuthService', () => {
     createdAt: '2026-06-06T10:00:00Z',
     updatedAt: '2026-06-06T10:00:00Z'
   };
+  const staleUser: User = {
+    id: 'f6ab8d18-3820-4c7b-8f0f-14d540bb5f2f',
+    email: 'stale@example.com',
+    displayName: 'Stale User',
+    createdAt: '2026-06-06T09:00:00Z',
+    updatedAt: '2026-06-06T09:00:00Z'
+  };
   const authResponse: AuthUserResponse = { user };
 
   let service: AuthService;
@@ -56,6 +63,19 @@ describe('AuthService', () => {
     expect(service.isAuthenticated()).toBeTrue();
   });
 
+  it('does not let a stale session load overwrite a newer login', () => {
+    service.loadSession().subscribe();
+    const sessionRequest = httpTestingController.expectOne('/api/auth/me');
+
+    service.login({ email: user.email, password: 'password123' }).subscribe();
+    httpTestingController.expectOne('/api/auth/login').flush(authResponse);
+
+    sessionRequest.flush(staleUser);
+
+    expect(service.currentUser()).toEqual(user);
+    expect(service.status()).toBe('authenticated');
+  });
+
   it('refreshes the session when the current user request is unauthorized', () => {
     service.loadSession().subscribe((result) => {
       expect(result).toEqual(user);
@@ -86,4 +106,3 @@ describe('AuthService', () => {
     expect(service.status()).toBe('anonymous');
   });
 });
-
