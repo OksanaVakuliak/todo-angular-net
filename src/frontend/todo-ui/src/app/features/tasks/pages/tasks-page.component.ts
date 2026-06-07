@@ -3,8 +3,10 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Category } from '../../categories/category.models';
+import { CategoriesService } from '../../categories/categories.service';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
-import { Category, PagedResult, TaskItem } from '../task.models';
+import { PagedResult, TaskItem } from '../task.models';
 import { TasksService } from '../tasks.service';
 
 @Component({
@@ -133,6 +135,7 @@ import { TasksService } from '../tasks.service';
 })
 export class TasksPageComponent {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly categoriesService = inject(CategoriesService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly tasksService = inject(TasksService);
   private readonly pageSize = 10;
@@ -286,7 +289,7 @@ export class TasksPageComponent {
   }
 
   private loadCategories(): void {
-    this.tasksService
+    this.categoriesService
       .listCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

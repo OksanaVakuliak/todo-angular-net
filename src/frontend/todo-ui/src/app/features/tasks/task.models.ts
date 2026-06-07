@@ -11,15 +11,6 @@ export interface TaskItem {
   updatedAt: string;
 }
 
-export interface Category {
-  id: string;
-  userId: string;
-  name: string;
-  color: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface PagedResult<T> {
   items: T[];
   page: number;
