@@ -125,9 +125,13 @@ export class CategoriesPageComponent {
   protected readonly isSaving = signal(false);
   protected readonly listErrorMessage = signal('');
 
-  protected readonly categoryForm = this.formBuilder.nonNullable.group({
-    name: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)]],
-    color: [this.fallbackColor]
+  protected readonly categoryForm = this.formBuilder.group({
+    name: this.formBuilder.nonNullable.control('', [
+      Validators.required,
+      Validators.pattern(/\S/),
+      Validators.maxLength(100)
+    ]),
+    color: this.formBuilder.control<string | null>(null)
   });
 
   constructor() {
@@ -139,7 +143,7 @@ export class CategoriesPageComponent {
     this.formErrorMessage.set('');
     this.categoryForm.reset({
       name: '',
-      color: this.fallbackColor
+      color: null
     });
   }
 
@@ -249,8 +253,9 @@ export class CategoriesPageComponent {
     this.formErrorMessage.set('');
     this.categoryForm.setValue({
       name: category.name,
-      color: category.color ?? this.fallbackColor
+      color: category.color
     });
+    this.categoryForm.markAsPristine();
   }
 
   private buildCreateRequest(): CreateCategoryRequest {
@@ -264,10 +269,14 @@ export class CategoriesPageComponent {
 
   private buildUpdateRequest(): UpdateCategoryRequest {
     const formValue = this.categoryForm.getRawValue();
-
-    return {
-      name: formValue.name.trim(),
-      color: formValue.color || null
+    const request: UpdateCategoryRequest = {
+      name: formValue.name.trim()
     };
+
+    if (this.categoryForm.controls.color.dirty) {
+      request.color = formValue.color || null;
+    }
+
+    return request;
   }
 }
