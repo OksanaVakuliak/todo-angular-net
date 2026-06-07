@@ -1,18 +1,258 @@
-.stack-status {
+.primary-button,
+.ghost-button,
+.danger-button,
+.task-actions a {
+  align-items: center;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 2.6rem;
+  padding: 0.7rem 0.95rem;
+  text-decoration: none;
+}
+
+.primary-button {
+  background: #0f766e;
+  border: 0;
+  color: #ffffff;
+}
+
+.primary-button:hover {
+  background: #115e59;
+}
+
+.ghost-button {
   background: #ffffff;
-  border: 1px solid rgba(37, 99, 235, 0.15);
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.ghost-button:hover {
+  background: #f1f5f9;
+}
+
+.danger-button {
+  background: #ffffff;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.danger-button:hover {
+  background: #fef2f2;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.task-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 0.5rem;
   color: #0f172a;
   margin-top: 1.5rem;
-  padding: 1rem 1.25rem;
+  padding: 1.25rem;
 }
 
-.stack-status h2 {
-  font-size: 1rem;
-  margin: 0 0 0.5rem;
+.panel-header {
+  align-items: start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
 }
 
-.stack-status p {
-  line-height: 1.5;
+.panel-header h2,
+.empty-state h3,
+.task-item h3 {
   margin: 0;
+}
+
+.panel-header h2 {
+  font-size: 1rem;
+}
+
+.panel-header p,
+.description,
+.empty-state p,
+.muted {
+  line-height: 1.5;
+}
+
+.panel-header p,
+.description,
+.empty-state p,
+.muted,
+.meta,
+.pagination {
+  color: #64748b;
+}
+
+.panel-header p {
+  margin: 0.35rem 0 0;
+}
+
+.filters {
+  align-items: end;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(12rem, 1fr) minmax(12rem, 16rem) auto;
+  margin-top: 1.25rem;
+}
+
+.filters label {
+  color: #334155;
+  display: grid;
+  font-size: 0.9rem;
+  font-weight: 700;
+  gap: 0.4rem;
+}
+
+.filters input,
+.filters select {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  color: #0f172a;
+  font: inherit;
+  min-height: 2.6rem;
+  padding: 0.7rem 0.8rem;
+}
+
+.filters input:focus,
+.filters select:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.16);
+  outline: none;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.alert {
+  border-radius: 0.5rem;
+  font-weight: 700;
+  margin: 1rem 0 0;
+  padding: 0.85rem 1rem;
+}
+
+.error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.empty-state {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.task-list {
+  display: grid;
+  gap: 0.85rem;
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+}
+
+.task-item {
+  align-items: start;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.task-item.completed {
+  background: #f8fafc;
+}
+
+.task-item.completed h3 {
+  color: #64748b;
+  text-decoration: line-through;
+}
+
+.task-main {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.completion-toggle {
+  align-items: center;
+  color: #475569;
+  display: flex;
+  font-size: 0.85rem;
+  font-weight: 800;
+  gap: 0.45rem;
+}
+
+.description {
+  margin: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  font-weight: 700;
+  gap: 0.5rem;
+}
+
+.meta span {
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.task-actions a {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 760px) {
+  .panel-header,
+  .task-item {
+    flex-direction: column;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-actions,
+  .pagination,
+  .task-actions {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .primary-button,
+  .ghost-button,
+  .danger-button,
+  .task-actions a {
+    width: 100%;
+  }
 }
