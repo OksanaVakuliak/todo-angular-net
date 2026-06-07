@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard, publicOnlyGuard } from './core/auth/auth.guards';
 import { AuthLayoutComponent } from './layout/auth-layout.component';
 import { ShellLayoutComponent } from './layout/shell-layout.component';
 
@@ -6,6 +7,7 @@ export const routes: Routes = [
   {
     path: '',
     component: AuthLayoutComponent,
+    canActivateChild: [publicOnlyGuard],
     children: [
       {
         path: 'login',
@@ -26,6 +28,7 @@ export const routes: Routes = [
   {
     path: '',
     component: ShellLayoutComponent,
+    canActivateChild: [authGuard],
     children: [
       {
         path: '',
