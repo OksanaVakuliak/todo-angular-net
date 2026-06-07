@@ -98,13 +98,17 @@ describe('TasksService', () => {
   });
 
   it('deletes a task', () => {
-    service.deleteTask(task.id).subscribe((result) => {
-      expect(result).toBeNull();
+    let requestCompleted = false;
+
+    service.deleteTask(task.id).subscribe(() => {
+      requestCompleted = true;
     });
 
     const request = httpTestingController.expectOne(`/api/tasks/${task.id}`);
     expect(request.request.method).toBe('DELETE');
     request.flush(null);
+
+    expect(requestCompleted).toBeTrue();
   });
 
   it('lists categories for task forms and filters', () => {

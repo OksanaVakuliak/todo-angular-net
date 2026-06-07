@@ -24,6 +24,10 @@ import { TasksService } from '../tasks.service';
           <a routerLink="/tasks">Back to tasks</a>
         </div>
       </div>
+    } @else if (isLoading()) {
+      <div class="task-form">
+        <p class="loading-message">Loading task...</p>
+      </div>
     } @else {
       <form class="task-form" [formGroup]="taskForm" (ngSubmit)="updateTask()">
         <label>
@@ -99,7 +103,7 @@ export class EditTaskPageComponent {
   protected readonly loadErrorMessage = signal('');
 
   protected readonly taskForm = this.formBuilder.nonNullable.group({
-    title: ['', [Validators.required, Validators.maxLength(200)]],
+    title: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(200)]],
     description: ['', [Validators.maxLength(2000)]],
     categoryId: [''],
     dueAt: [''],

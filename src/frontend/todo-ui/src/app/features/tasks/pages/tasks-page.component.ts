@@ -136,6 +136,7 @@ export class TasksPageComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly tasksService = inject(TasksService);
   private readonly pageSize = 10;
+  private latestLoadId = 0;
 
   protected readonly categories = signal<Category[]>([]);
   protected readonly currentPage = signal(1);
@@ -234,7 +235,9 @@ export class TasksPageComponent {
 
   protected loadTasks(): void {
     const filters = this.filtersForm.getRawValue();
+    const loadId = this.latestLoadId + 1;
 
+    this.latestLoadId = loadId;
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -248,6 +251,10 @@ export class TasksPageComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
+          if (loadId !== this.latestLoadId) {
+            return;
+          }
+
           this.tasksResult.set({
             ...result,
             totalPages: Math.max(result.totalPages, 1)
@@ -256,6 +263,10 @@ export class TasksPageComponent {
           this.isLoading.set(false);
         },
         error: (error) => {
+          if (loadId !== this.latestLoadId) {
+            return;
+          }
+
           this.errorMessage.set(
             this.tasksService.getErrorMessage(error, 'Unable to load tasks.')
           );
