@@ -32,7 +32,9 @@ export class AuthService {
     this.sessionRequest = this.httpClient.get<User>('/api/auth/me').pipe(
       tap((user) => this.setSessionIfCurrent(version, user)),
       catchError((error: HttpErrorResponse) =>
-        error.status === 401 ? this.refreshSession() : this.clearSessionIfCurrent(version)
+        error.status === 401 && version === this.sessionVersion
+          ? this.refreshSession()
+          : this.clearSessionIfCurrent(version)
       ),
       finalize(() => {
         if (version === this.sessionVersion) {

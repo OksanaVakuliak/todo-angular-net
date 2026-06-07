@@ -76,6 +76,20 @@ describe('AuthService', () => {
     expect(service.status()).toBe('authenticated');
   });
 
+  it('does not refresh a stale session load after a newer login', () => {
+    service.loadSession().subscribe();
+    const sessionRequest = httpTestingController.expectOne('/api/auth/me');
+
+    service.login({ email: user.email, password: 'password123' }).subscribe();
+    httpTestingController.expectOne('/api/auth/login').flush(authResponse);
+
+    sessionRequest.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+
+    httpTestingController.expectNone('/api/auth/refresh');
+    expect(service.currentUser()).toEqual(user);
+    expect(service.status()).toBe('authenticated');
+  });
+
   it('refreshes the session when the current user request is unauthorized', () => {
     service.loadSession().subscribe((result) => {
       expect(result).toEqual(user);
