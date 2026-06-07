@@ -48,6 +48,13 @@ export const routes: Routes = [
           import('./features/tasks/pages/new-task-page.component').then(
             (module) => module.NewTaskPageComponent
           )
+      },
+      {
+        path: 'tasks/:taskId/edit',
+        loadComponent: () =>
+          import('./features/tasks/pages/edit-task-page.component').then(
+            (module) => module.EditTaskPageComponent
+          )
       }
     ]
   },
