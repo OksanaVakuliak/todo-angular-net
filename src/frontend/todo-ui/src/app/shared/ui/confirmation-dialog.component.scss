@@ -1,0 +1,111 @@
+.dialog-backdrop {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.46);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1rem;
+  position: fixed;
+  z-index: 20;
+}
+
+.dialog {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  box-shadow: 0 1.5rem 4rem rgba(15, 23, 42, 0.24);
+  color: #0f172a;
+  display: grid;
+  gap: 1rem;
+  max-width: 28rem;
+  padding: 1.25rem;
+  width: min(100%, 28rem);
+}
+
+.dialog-icon {
+  align-items: center;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 999px;
+  color: #b91c1c;
+  display: inline-flex;
+  font-size: 1.15rem;
+  font-weight: 900;
+  height: 2.5rem;
+  justify-content: center;
+  width: 2.5rem;
+}
+
+.dialog-content {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.dialog-content h2,
+.dialog-content p {
+  margin: 0;
+}
+
+.dialog-content h2 {
+  font-size: 1.15rem;
+}
+
+.dialog-content p {
+  color: #475569;
+  line-height: 1.55;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.secondary-button,
+.danger-button {
+  align-items: center;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 2.6rem;
+  padding: 0.7rem 0.95rem;
+}
+
+.secondary-button {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.secondary-button:hover {
+  background: #f1f5f9;
+}
+
+.danger-button {
+  background: #b91c1c;
+  border: 1px solid #b91c1c;
+  color: #ffffff;
+}
+
+.danger-button:hover {
+  background: #991b1b;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+@media (max-width: 520px) {
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .secondary-button,
+  .danger-button {
+    width: 100%;
+  }
+}

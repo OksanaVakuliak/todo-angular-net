@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
+import { ConfirmationDialogComponent } from '../../../shared/ui/confirmation-dialog.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
 import { PagedResult, TaskItem } from '../task.models';
 import { TasksService } from '../tasks.service';
@@ -12,7 +13,13 @@ import { TasksService } from '../tasks.service';
 @Component({
   selector: 'app-tasks-page',
   standalone: true,
-  imports: [CommonModule, PageIntroComponent, ReactiveFormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    ConfirmationDialogComponent,
+    PageIntroComponent,
+    ReactiveFormsModule,
+    RouterLink
+  ],
   template: `
     <app-page-intro
       eyebrow="Tasks"
@@ -27,7 +34,9 @@ import { TasksService } from '../tasks.service';
           <p>{{ taskSummary() }}</p>
         </div>
 
-        <button type="button" class="ghost-button" (click)="loadTasks()">Refresh</button>
+        <button type="button" class="ghost-button" [disabled]="isLoading()" (click)="loadTasks()">
+          {{ isLoading() ? 'Refreshing...' : 'Refresh' }}
+        </button>
       </div>
 
       <form class="filters" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
@@ -47,7 +56,14 @@ import { TasksService } from '../tasks.service';
         </label>
 
         <div class="filter-actions">
-          <button type="button" class="ghost-button" (click)="clearFilters()">Clear</button>
+          <button
+            type="button"
+            class="ghost-button"
+            [disabled]="!hasActiveFilters() || isLoading()"
+            (click)="clearFilters()"
+          >
+            Clear
+          </button>
           <button type="submit" class="primary-button">Apply</button>
         </div>
       </form>
@@ -60,8 +76,8 @@ import { TasksService } from '../tasks.service';
         <p class="muted">Loading tasks...</p>
       } @else if (tasksResult().items.length === 0) {
         <div class="empty-state">
-          <h3>No tasks yet</h3>
-          <p>Create your first task from the New Task page or adjust the filters.</p>
+          <h3>{{ hasActiveFilters() ? 'No matching tasks' : 'No tasks yet' }}</h3>
+          <p>{{ emptyStateMessage() }}</p>
         </div>
       } @else {
         <ul class="task-list">
@@ -98,9 +114,9 @@ import { TasksService } from '../tasks.service';
                   type="button"
                   class="danger-button"
                   [disabled]="deletingTaskId() === task.id"
-                  (click)="deleteTask(task)"
+                  (click)="requestTaskDelete(task)"
                 >
-                  Delete
+                  {{ deletingTaskId() === task.id ? 'Deleting...' : 'Delete' }}
                 </button>
               </div>
             </li>
@@ -109,6 +125,8 @@ import { TasksService } from '../tasks.service';
       }
 
       <div class="pagination" aria-label="Task pagination">
+        <span>{{ pageRangeSummary() }}</span>
+
         <button
           type="button"
           class="ghost-button"
@@ -130,6 +148,17 @@ import { TasksService } from '../tasks.service';
         </button>
       </div>
     </section>
+
+    <app-confirmation-dialog
+      [isOpen]="taskPendingDelete() !== null"
+      [isBusy]="deletingTaskId() === taskPendingDelete()?.id"
+      title="Delete task?"
+      [message]="deleteTaskMessage()"
+      confirmLabel="Delete task"
+      busyLabel="Deleting..."
+      (cancelled)="cancelTaskDelete()"
+      (confirmed)="confirmTaskDelete()"
+    />
   `,
   styleUrl: './tasks-page.component.scss'
 })
@@ -146,6 +175,7 @@ export class TasksPageComponent {
   protected readonly deletingTaskId = signal<string | null>(null);
   protected readonly errorMessage = signal('');
   protected readonly isLoading = signal(false);
+  protected readonly taskPendingDelete = signal<TaskItem | null>(null);
   protected readonly updatingTaskId = signal<string | null>(null);
   protected readonly tasksResult = signal<PagedResult<TaskItem>>({
     items: [],
@@ -209,10 +239,14 @@ export class TasksPageComponent {
       });
   }
 
-  protected deleteTask(task: TaskItem): void {
-    const confirmed = window.confirm(`Delete "${task.title}"?`);
+  protected cancelTaskDelete(): void {
+    this.taskPendingDelete.set(null);
+  }
 
-    if (!confirmed) {
+  protected confirmTaskDelete(): void {
+    const task = this.taskPendingDelete();
+
+    if (!task) {
       return;
     }
 
@@ -225,6 +259,7 @@ export class TasksPageComponent {
       .subscribe({
         next: () => {
           this.deletingTaskId.set(null);
+          this.taskPendingDelete.set(null);
           this.loadTasks();
         },
         error: (error) => {
@@ -234,6 +269,20 @@ export class TasksPageComponent {
           this.deletingTaskId.set(null);
         }
       });
+  }
+
+  protected deleteTaskMessage(): string {
+    const task = this.taskPendingDelete();
+
+    return task
+      ? `This will permanently delete "${task.title}". This action cannot be undone.`
+      : '';
+  }
+
+  protected emptyStateMessage(): string {
+    return this.hasActiveFilters()
+      ? 'Try a different search term or category filter.'
+      : 'Create your first task from the New Task page.';
   }
 
   protected loadTasks(): void {
@@ -276,6 +325,29 @@ export class TasksPageComponent {
           this.isLoading.set(false);
         }
       });
+  }
+
+  protected hasActiveFilters(): boolean {
+    const filters = this.filtersForm.getRawValue();
+
+    return filters.search.trim().length > 0 || filters.categoryId.length > 0;
+  }
+
+  protected pageRangeSummary(): string {
+    const result = this.tasksResult();
+
+    if (result.totalItems === 0) {
+      return 'No tasks to show';
+    }
+
+    const firstItem = (result.page - 1) * result.limit + 1;
+    const lastItem = Math.min(result.page * result.limit, result.totalItems);
+
+    return `Showing ${firstItem}-${lastItem} of ${result.totalItems}`;
+  }
+
+  protected requestTaskDelete(task: TaskItem): void {
+    this.taskPendingDelete.set(task);
   }
 
   protected taskSummary(): string {
