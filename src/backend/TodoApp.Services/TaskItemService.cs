@@ -189,6 +189,7 @@ public sealed class TaskItemService(
             taskItem.UserId,
             taskItem.CategoryId,
             taskItem.CategoryName,
+            taskItem.CategoryColor,
             taskItem.Title,
             taskItem.Description,
             taskItem.IsCompleted,

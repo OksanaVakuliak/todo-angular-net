@@ -1,11 +1,14 @@
 .task-form {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
+  box-shadow: var(--shadow-soft);
   display: grid;
   gap: 1rem;
+  margin-inline: auto;
   max-width: 42rem;
-  padding: 1.25rem;
+  padding: 1.5rem;
+  width: min(100%, 42rem);
 }
 
 .form-grid {
@@ -15,7 +18,7 @@
 }
 
 label {
-  color: #334155;
+  color: var(--color-text);
   display: grid;
   font-size: 0.9rem;
   font-weight: 700;
@@ -25,11 +28,21 @@ label {
 input,
 select,
 textarea {
-  border: 1px solid #cbd5e1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
-  color: #0f172a;
+  color: var(--color-text);
   font: inherit;
   padding: 0.75rem 0.85rem;
+  transition:
+    border-color var(--transition-control),
+    box-shadow var(--transition-control),
+    background-color var(--transition-control);
+  width: 100%;
+}
+
+textarea {
+  resize: vertical;
 }
 
 .checkbox-label {
@@ -46,52 +59,68 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #0ea5e9;
-  box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.16);
+  border-color: var(--color-focus);
+  box-shadow: var(--shadow-focus);
   outline: none;
 }
 
 .form-alert {
-  background: #fef2f2;
+  background: var(--color-danger-soft);
   border-radius: 0.5rem;
-  color: #991b1b;
+  color: var(--color-danger-text);
   font-weight: 700;
   margin: 0;
   padding: 0.85rem 1rem;
 }
 
 .loading-message {
-  color: #64748b;
+  color: var(--color-muted);
   font-weight: 700;
   margin: 0;
 }
 
 .actions {
   align-items: center;
+  border-top: 1px solid var(--color-border);
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
+  margin-top: 0.25rem;
+  padding-top: 1rem;
 }
 
 .actions a {
-  color: #475569;
+  color: var(--color-muted);
   font-weight: 800;
   text-decoration: none;
+  transition:
+    color var(--transition-control),
+    box-shadow var(--transition-control);
+}
+
+.actions a:hover {
+  color: var(--color-primary);
+}
+
+.actions a:focus-visible {
+  box-shadow: var(--shadow-focus);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 0.2rem;
 }
 
 button {
-  background: #0f766e;
+  background: var(--color-primary);
   border: 0;
   border-radius: 0.5rem;
-  color: #ffffff;
+  color: var(--color-primary-text);
   cursor: pointer;
   font: inherit;
   font-weight: 800;
   padding: 0.8rem 1rem;
   transition:
-    background-color 160ms ease,
-    box-shadow 160ms ease,
-    transform 160ms ease;
+    background-color var(--transition-control),
+    box-shadow var(--transition-control),
+    transform var(--transition-control);
 }
 
 button:disabled {
@@ -100,13 +129,13 @@ button:disabled {
 }
 
 button:hover {
-  background: #115e59;
+  background: var(--color-primary-hover);
   transform: translateY(-1px);
 }
 
 button:focus {
-  background: #115e59;
-  box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.18);
+  background: var(--color-primary-hover);
+  box-shadow: var(--shadow-focus);
   outline: none;
 }
 

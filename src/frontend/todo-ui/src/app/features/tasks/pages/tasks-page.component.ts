@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, DestroyRef, OnDestroy, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -47,12 +47,14 @@ import { TasksService } from '../tasks.service';
 
         <label>
           Category
-          <select formControlName="categoryId">
-            <option value="">All categories</option>
-            @for (category of categories(); track category.id) {
-              <option [value]="category.id">{{ category.name }}</option>
-            }
-          </select>
+          <span class="select-control">
+            <select formControlName="categoryId">
+              <option value="">All categories</option>
+              @for (category of categories(); track category.id) {
+                <option [value]="category.id">{{ category.name }}</option>
+              }
+            </select>
+          </span>
         </label>
 
         <div class="filter-actions">
@@ -82,7 +84,11 @@ import { TasksService } from '../tasks.service';
       } @else {
         <ul class="task-list">
           @for (task of tasksResult().items; track task.id) {
-            <li class="task-item" [class.completed]="task.isCompleted">
+            <li
+              class="task-item"
+              [class.completed]="task.isCompleted"
+              [ngClass]="taskCardColorClass(task)"
+            >
               <div class="task-main">
                 <label class="completion-toggle">
                   <input
@@ -94,18 +100,18 @@ import { TasksService } from '../tasks.service';
                   <span>{{ task.isCompleted ? 'Completed' : 'Open' }}</span>
                 </label>
 
-                <h3>{{ task.title }}</h3>
-
-                @if (task.description) {
-                  <p class="description">{{ task.description }}</p>
-                }
-
                 <div class="meta">
                   <span>{{ task.categoryName ?? 'No category' }}</span>
                   @if (task.dueAt) {
                     <span>Due {{ task.dueAt | date: 'mediumDate' }}</span>
                   }
                 </div>
+
+                <h3>{{ task.title }}</h3>
+
+                @if (task.description) {
+                  <p class="description">{{ task.description }}</p>
+                }
               </div>
 
               <div class="task-actions">
@@ -162,13 +168,15 @@ import { TasksService } from '../tasks.service';
   `,
   styleUrl: './tasks-page.component.scss'
 })
-export class TasksPageComponent {
+export class TasksPageComponent implements OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   private readonly categoriesService = inject(CategoriesService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly tasksService = inject(TasksService);
   private readonly pageSize = 10;
   private latestLoadId = 0;
+  private taskCardStyleElement: HTMLStyleElement | null = null;
 
   protected readonly categories = signal<Category[]>([]);
   protected readonly currentPage = signal(1);
@@ -193,6 +201,10 @@ export class TasksPageComponent {
   constructor() {
     this.loadCategories();
     this.loadTasks();
+  }
+
+  ngOnDestroy(): void {
+    this.taskCardStyleElement?.remove();
   }
 
   protected applyFilters(): void {
@@ -311,6 +323,7 @@ export class TasksPageComponent {
             ...result,
             totalPages: Math.max(result.totalPages, 1)
           });
+          this.syncTaskCardStyles(result.items);
           this.currentPage.set(result.page);
           this.isLoading.set(false);
         },
@@ -356,6 +369,12 @@ export class TasksPageComponent {
     return result.totalItems === 1 ? '1 task found' : `${result.totalItems} tasks found`;
   }
 
+  protected taskCardColorClass(task: TaskItem): string {
+    return task.categoryId && this.getTaskCategoryColor(task)
+      ? `task-card-${this.toCssIdentifier(task.id)}`
+      : 'task-category-empty';
+  }
+
   protected totalPages(): number {
     return Math.max(this.tasksResult().totalPages, 1);
   }
@@ -365,8 +384,94 @@ export class TasksPageComponent {
       .listCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (categories) => this.categories.set(categories),
+        next: (categories) => {
+          this.categories.set(categories);
+          this.syncTaskCardStyles(this.tasksResult().items);
+        },
         error: () => this.categories.set([])
       });
+  }
+
+  private syncTaskCardStyles(tasks: TaskItem[]): void {
+    const rules = tasks
+      .filter((task) => task.categoryId && this.isHexColor(this.getTaskCategoryColor(task)))
+      .map((task) => {
+        const background = this.normalizeHexColor(this.getTaskCategoryColor(task) as string);
+        const textColor = this.getReadableTextColor(background);
+        const mutedColor = this.getReadableMutedTextColor(textColor);
+        const className = this.toCssIdentifier(task.id);
+
+        return `.task-item.task-card-${className}{--task-card-bg:${background};--task-card-text:${textColor};--task-card-muted:${mutedColor};background:${background};border-color:${background};}`;
+      });
+
+    if (rules.length === 0) {
+      this.taskCardStyleElement?.remove();
+      this.taskCardStyleElement = null;
+      return;
+    }
+
+    if (!this.taskCardStyleElement) {
+      this.taskCardStyleElement = this.document.createElement('style');
+      this.taskCardStyleElement.setAttribute('data-task-card-colors', 'true');
+      this.document.head.appendChild(this.taskCardStyleElement);
+    }
+
+    this.taskCardStyleElement.textContent = Array.from(new Set(rules)).join('');
+  }
+
+  private getReadableTextColor(background: string): '#111827' | '#ffffff' {
+    const darkText = '#111827';
+    const lightText = '#ffffff';
+    const darkContrast = this.getContrastRatio(background, darkText);
+    const lightContrast = this.getContrastRatio(background, lightText);
+
+    return darkContrast >= lightContrast ? darkText : lightText;
+  }
+
+  private getReadableMutedTextColor(textColor: '#111827' | '#ffffff'): string {
+    return textColor;
+  }
+
+  private getContrastRatio(firstColor: string, secondColor: string): number {
+    const firstLuminance = this.getRelativeLuminance(firstColor);
+    const secondLuminance = this.getRelativeLuminance(secondColor);
+    const lighter = Math.max(firstLuminance, secondLuminance);
+    const darker = Math.min(firstLuminance, secondLuminance);
+
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  private getRelativeLuminance(color: string): number {
+    const normalizedColor = color.replace('#', '');
+    const red = Number.parseInt(normalizedColor.slice(0, 2), 16);
+    const green = Number.parseInt(normalizedColor.slice(2, 4), 16);
+    const blue = Number.parseInt(normalizedColor.slice(4, 6), 16);
+    const [linearRed, linearGreen, linearBlue] = [red, green, blue].map((channel) => {
+      const value = channel / 255;
+
+      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    });
+
+    return 0.2126 * linearRed + 0.7152 * linearGreen + 0.0722 * linearBlue;
+  }
+
+  private getTaskCategoryColor(task: TaskItem): string | null {
+    if (this.isHexColor(task.categoryColor)) {
+      return task.categoryColor;
+    }
+
+    return this.categories().find((category) => category.id === task.categoryId)?.color ?? null;
+  }
+
+  private isHexColor(value: string | null): value is string {
+    return /^#?[\da-f]{6}$/i.test(value ?? '');
+  }
+
+  private normalizeHexColor(value: string): string {
+    return value.startsWith('#') ? value : `#${value}`;
+  }
+
+  private toCssIdentifier(value: string): string {
+    return value.replace(/[^\da-z]/gi, '');
   }
 }

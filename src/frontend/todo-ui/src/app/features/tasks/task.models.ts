@@ -3,6 +3,7 @@ export interface TaskItem {
   userId: string;
   categoryId: string | null;
   categoryName: string | null;
+  categoryColor: string | null;
   title: string;
   description: string | null;
   isCompleted: boolean;

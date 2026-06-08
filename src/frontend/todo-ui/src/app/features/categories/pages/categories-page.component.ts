@@ -135,7 +135,7 @@ export class CategoriesPageComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
 
-  protected readonly fallbackColor = '#0f766e';
+  protected readonly fallbackColor = '#a5cf83';
   protected readonly categories = signal<Category[]>([]);
   protected readonly categoryPendingDelete = signal<Category | null>(null);
   protected readonly deletingCategoryId = signal<string | null>(null);

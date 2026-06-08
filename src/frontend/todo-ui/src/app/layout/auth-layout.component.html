@@ -1,6 +1,9 @@
 <main class="auth-layout">
   <section class="auth-panel" aria-label="Authentication">
-    <a class="brand" routerLink="/tasks">To-Do App</a>
+    <div class="auth-header">
+      <a class="brand" routerLink="/tasks">To-Do App</a>
+      <app-theme-switcher />
+    </div>
     <router-outlet></router-outlet>
   </section>
 </main>

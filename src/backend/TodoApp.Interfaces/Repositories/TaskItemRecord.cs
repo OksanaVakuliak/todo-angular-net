@@ -5,6 +5,7 @@ public sealed record TaskItemRecord(
     Guid UserId,
     Guid? CategoryId,
     string? CategoryName,
+    string? CategoryColor,
     string Title,
     string? Description,
     bool IsCompleted,

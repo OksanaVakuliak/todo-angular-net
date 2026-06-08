@@ -44,17 +44,21 @@ import { TasksService } from '../tasks.service';
       <div class="form-grid">
         <label>
           Category
-          <select formControlName="categoryId">
-            <option value="">No category</option>
-            @for (category of categories(); track category.id) {
-              <option [value]="category.id">{{ category.name }}</option>
-            }
-          </select>
+          <span class="select-control">
+            <select formControlName="categoryId">
+              <option value="">No category</option>
+              @for (category of categories(); track category.id) {
+                <option [value]="category.id">{{ category.name }}</option>
+              }
+            </select>
+          </span>
         </label>
 
         <label>
           Due date
-          <input type="datetime-local" formControlName="dueAt" />
+          <span class="date-control">
+            <input type="datetime-local" formControlName="dueAt" />
+          </span>
         </label>
       </div>
 
