@@ -55,19 +55,21 @@ import { TasksService } from '../tasks.service';
       </label>
 
       <div class="form-grid">
-        <mat-form-field class="app-material-field">
-          <mat-label>Category</mat-label>
-          <mat-select formControlName="categoryId" [disabled]="isLoadingCategories()">
-            @if (isLoadingCategories()) {
-              <mat-option value="">Loading categories...</mat-option>
-            } @else {
-              <mat-option value="">No category</mat-option>
-              @for (category of categories(); track category.id) {
-                <mat-option [value]="category.id">{{ category.name }}</mat-option>
+        <div class="field-control">
+          <span class="field-label">Category</span>
+          <mat-form-field class="app-material-field">
+            <mat-select formControlName="categoryId" [disabled]="isLoadingCategories()">
+              @if (isLoadingCategories()) {
+                <mat-option value="">Loading categories...</mat-option>
+              } @else {
+                <mat-option value="">No category</mat-option>
+                @for (category of categories(); track category.id) {
+                  <mat-option [value]="category.id">{{ category.name }}</mat-option>
+                }
               }
-            }
-          </mat-select>
-        </mat-form-field>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
         <mat-form-field class="app-material-field">
           <mat-label>Due date</mat-label>

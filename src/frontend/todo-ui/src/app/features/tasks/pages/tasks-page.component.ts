@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, DestroyRef, OnDestroy, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -50,8 +50,8 @@ import { TasksService } from '../tasks.service';
         </label>
 
         <div class="filter-control">
+          <span class="filter-label">Category</span>
           <mat-form-field class="app-material-field filter-field">
-            <mat-label>Category</mat-label>
             <mat-select formControlName="categoryId">
               <mat-option value="">All categories</mat-option>
               @for (category of categories(); track category.id) {
@@ -122,16 +122,7 @@ import { TasksService } from '../tasks.service';
                 </label>
 
                 <div class="meta">
-                  <span class="category-pill">
-                    @if (task.categoryColor) {
-                      <input
-                        class="category-swatch"
-                        type="color"
-                        [value]="task.categoryColor"
-                        disabled
-                        aria-label="Category color"
-                      />
-                    }
+                  <span class="category-pill" [ngClass]="categoryPillClass(task)">
                     {{ task.categoryName ?? 'No category' }}
                   </span>
                   @if (task.dueAt) {
@@ -200,13 +191,15 @@ import { TasksService } from '../tasks.service';
   `,
   styleUrl: './tasks-page.component.scss'
 })
-export class TasksPageComponent {
+export class TasksPageComponent implements OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   private readonly categoriesService = inject(CategoriesService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly tasksService = inject(TasksService);
   private readonly pageSize = 10;
   private latestLoadId = 0;
+  private categoryBadgeStyleElement: HTMLStyleElement | null = null;
 
   protected readonly categories = signal<Category[]>([]);
   protected readonly categoryErrorMessage = signal('');
@@ -233,6 +226,10 @@ export class TasksPageComponent {
   constructor() {
     this.loadCategories();
     this.loadTasks();
+  }
+
+  ngOnDestroy(): void {
+    this.categoryBadgeStyleElement?.remove();
   }
 
   protected applyFilters(): void {
@@ -351,6 +348,7 @@ export class TasksPageComponent {
             ...result,
             totalPages: Math.max(result.totalPages, 1)
           });
+          this.syncCategoryBadgeStyles(result.items);
           this.currentPage.set(result.page);
           this.hasLoadedTasks.set(true);
           this.isLoading.set(false);
@@ -398,6 +396,12 @@ export class TasksPageComponent {
     return result.totalItems === 1 ? '1 task found' : `${result.totalItems} tasks found`;
   }
 
+  protected categoryPillClass(task: TaskItem): string {
+    return task.categoryId && this.getTaskCategoryColor(task)
+      ? `task-category-${this.toCssIdentifier(task.categoryId)}`
+      : 'task-category-empty';
+  }
+
   protected totalPages(): number {
     return Math.max(this.tasksResult().totalPages, 1);
   }
@@ -423,6 +427,7 @@ export class TasksPageComponent {
       .subscribe({
         next: (categories) => {
           this.categories.set(categories);
+          this.syncCategoryBadgeStyles(this.tasksResult().items);
         },
         error: (error) => {
           this.categories.set([]);
@@ -434,5 +439,86 @@ export class TasksPageComponent {
           );
         }
       });
+  }
+
+  private syncCategoryBadgeStyles(tasks: TaskItem[]): void {
+    const rules = tasks
+      .filter((task) => task.categoryId && this.getTaskCategoryColor(task))
+      .map((task) => {
+        const background = this.normalizeHexColor(this.getTaskCategoryColor(task) as string);
+        const textColor = this.getReadableTextColor(background);
+        const className = this.toCssIdentifier(task.categoryId as string);
+
+        return `.task-list .task-item .meta .category-pill.task-category-${className}{--category-pill-bg:${background};--category-pill-border:${background};--category-pill-text:${textColor};background:${background};border-color:${background};color:${textColor};}`;
+      });
+
+    if (rules.length === 0) {
+      this.categoryBadgeStyleElement?.remove();
+      this.categoryBadgeStyleElement = null;
+      return;
+    }
+
+    if (!this.categoryBadgeStyleElement) {
+      this.categoryBadgeStyleElement = this.document.createElement('style');
+      this.categoryBadgeStyleElement.setAttribute('data-category-badge-colors', 'true');
+      this.document.head.appendChild(this.categoryBadgeStyleElement);
+    }
+
+    this.categoryBadgeStyleElement.textContent = Array.from(new Set(rules)).join('');
+  }
+
+  private getTaskCategoryColor(task: TaskItem): string | null {
+    if (this.isHexColor(task.categoryColor)) {
+      return task.categoryColor;
+    }
+
+    const categoryColor =
+      this.categories().find((category) => category.id === task.categoryId)?.color ?? null;
+
+    return this.isHexColor(categoryColor) ? categoryColor : null;
+  }
+
+  private getReadableTextColor(background: string): '#111827' | '#ffffff' {
+    const darkText = '#111827';
+    const lightText = '#ffffff';
+    const darkContrast = this.getContrastRatio(background, darkText);
+    const lightContrast = this.getContrastRatio(background, lightText);
+
+    return darkContrast >= lightContrast ? darkText : lightText;
+  }
+
+  private getContrastRatio(firstColor: string, secondColor: string): number {
+    const firstLuminance = this.getRelativeLuminance(firstColor);
+    const secondLuminance = this.getRelativeLuminance(secondColor);
+    const lighter = Math.max(firstLuminance, secondLuminance);
+    const darker = Math.min(firstLuminance, secondLuminance);
+
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  private getRelativeLuminance(color: string): number {
+    const normalizedColor = color.replace('#', '');
+    const red = Number.parseInt(normalizedColor.slice(0, 2), 16);
+    const green = Number.parseInt(normalizedColor.slice(2, 4), 16);
+    const blue = Number.parseInt(normalizedColor.slice(4, 6), 16);
+    const [linearRed, linearGreen, linearBlue] = [red, green, blue].map((channel) => {
+      const value = channel / 255;
+
+      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    });
+
+    return 0.2126 * linearRed + 0.7152 * linearGreen + 0.0722 * linearBlue;
+  }
+
+  private isHexColor(value: string | null): value is string {
+    return /^#?[\da-f]{6}$/i.test(value ?? '');
+  }
+
+  private normalizeHexColor(value: string): string {
+    return value.startsWith('#') ? value : `#${value}`;
+  }
+
+  private toCssIdentifier(value: string): string {
+    return value.replace(/[^\da-z]/gi, '');
   }
 }
