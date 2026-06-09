@@ -10,20 +10,21 @@
 }
 
 .dialog-panel {
-  box-shadow: var(--shadow-strong);
-  max-width: 28rem;
-  width: 100%;
-}
-
-.modal-content {
+  // Bootstrap declares these on `.modal`; we render `.modal-content` on its
+  // own, so re-declare them here to restore the header/body/footer spacing.
+  --bs-modal-padding: 1.25rem;
+  --bs-modal-header-padding: 1.25rem;
+  --bs-modal-header-border-width: 1px;
+  --bs-modal-header-border-color: var(--color-border);
+  --bs-modal-footer-border-width: 1px;
+  --bs-modal-footer-border-color: var(--color-border);
+  --bs-modal-footer-gap: 0.5rem;
   background: var(--color-surface);
   border-color: var(--color-border);
+  box-shadow: var(--shadow-strong);
   color: var(--color-text);
-}
-
-.modal-header,
-.modal-footer {
-  border-color: var(--color-border);
+  max-width: 28rem;
+  width: 100%;
 }
 
 .modal-body {
