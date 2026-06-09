@@ -103,7 +103,7 @@ cp .env.example .env
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `MSSQL_SA_PASSWORD` | yes | `ChangeMe123!` | SQL Server `sa` password. Must be strong: upper/lowercase letters, a number, and a symbol. |
-| `JWT_SIGNING_KEY` | yes | local dev key | Secret key used to sign JWT auth tokens. Change before production. |
+| `JWT_SIGNING_KEY` | yes | local dev key | Secret key used to sign JWT auth tokens. Must be at least 32 bytes (256 bits) for HMAC-SHA256 — a shorter key makes the backend fail at startup via `JwtOptions.Validate()`. Generate with a cryptographic random generator and change before production. |
 | `TODOAPP_DB_NAME` | no | `TodoAppDb` | Application database name. |
 | `FRONTEND_PORT` | no | `4200` | Host port for the frontend. |
 | `BACKEND_PORT` | no | `8080` | Host port for the backend API. |
