@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { catchError, defer, finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
+import { getApiErrorMessage } from '../api/api-error.utils';
 import { AuthStatus, AuthUserResponse, LoginRequest, RegisterRequest, User } from './auth.models';
 
 @Injectable({
@@ -88,14 +89,10 @@ export class AuthService {
   }
 
   getErrorMessage(error: unknown, fallback: string): string {
-    if (error instanceof HttpErrorResponse && typeof error.error?.message === 'string') {
-      return error.error.message;
-    }
-
-    return fallback;
+    return getApiErrorMessage(error, fallback);
   }
 
-  private refreshSession(): Observable<User | null> {
+  refreshSession(): Observable<User | null> {
     return defer(() => {
       const version = this.beginSessionMutation();
 

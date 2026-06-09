@@ -1,6 +1,7 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { getApiErrorMessage } from '../../core/api/api-error.utils';
 import { Category, CreateCategoryRequest, UpdateCategoryRequest } from './category.models';
 
 @Injectable({
@@ -26,10 +27,6 @@ export class CategoriesService {
   }
 
   getErrorMessage(error: unknown, fallback: string): string {
-    if (error instanceof HttpErrorResponse && typeof error.error?.message === 'string') {
-      return error.error.message;
-    }
-
-    return fallback;
+    return getApiErrorMessage(error, fallback);
   }
 }

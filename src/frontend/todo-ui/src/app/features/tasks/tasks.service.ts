@@ -1,6 +1,7 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { getApiErrorMessage } from '../../core/api/api-error.utils';
 import { CreateTaskRequest, PagedResult, TaskItem, TaskListQuery, UpdateTaskRequest } from './task.models';
 
 @Injectable({
@@ -42,10 +43,6 @@ export class TasksService {
   }
 
   getErrorMessage(error: unknown, fallback: string): string {
-    if (error instanceof HttpErrorResponse && typeof error.error?.message === 'string') {
-      return error.error.message;
-    }
-
-    return fallback;
+    return getApiErrorMessage(error, fallback);
   }
 }
