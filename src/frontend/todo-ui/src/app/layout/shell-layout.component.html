@@ -1,29 +1,36 @@
-<div class="shell">
-  <aside class="sidebar">
-    <a class="brand" routerLink="/tasks" aria-label="To-Do App home">To-Do App</a>
+<div class="shell container-xxl">
+  <div class="row g-3 g-lg-0">
+    <aside class="sidebar col-12 col-lg-4 col-xl-3">
+      <a class="brand" routerLink="/tasks" aria-label="To-Do App home">To-Do App</a>
 
-    <div class="sidebar-footer" aria-label="Account actions">
-      <app-theme-switcher />
-      @if (authService.currentUser(); as user) {
-        <span class="account-name">{{ user.displayName }}</span>
-      }
-      <div class="account-actions">
-        <button type="button" class="logout-button btn btn-outline-secondary btn-sm" (click)="logout()">
-          Sign out
-        </button>
+      <div class="sidebar-footer" aria-label="Account actions">
+        <app-theme-switcher />
+        @if (authService.currentUser(); as user) {
+          <span class="account-name">{{ user.displayName }}</span>
+        }
+        <div class="account-actions">
+          <button type="button" class="btn btn-outline-secondary btn-sm w-100" (click)="logout()">
+            Sign out
+          </button>
+        </div>
       </div>
-    </div>
 
-    <nav class="nav">
-      <a routerLink="/tasks" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        Tasks
-      </a>
-      <a routerLink="/tasks/new" routerLinkActive="active">New Task</a>
-      <a routerLink="/categories" routerLinkActive="active">Categories</a>
-    </nav>
-  </aside>
+      <nav class="nav nav-pills flex-column gap-1">
+        <a
+          class="nav-link"
+          routerLink="/tasks"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Tasks
+        </a>
+        <a class="nav-link" routerLink="/tasks/new" routerLinkActive="active">New Task</a>
+        <a class="nav-link" routerLink="/categories" routerLinkActive="active">Categories</a>
+      </nav>
+    </aside>
 
-  <main class="content">
-    <router-outlet></router-outlet>
-  </main>
+    <main class="content col-12 col-lg-8 col-xl-9">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>

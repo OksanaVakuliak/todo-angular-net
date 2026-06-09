@@ -5,11 +5,13 @@ import { AppTheme, ThemeService } from '../../core/theme/theme.service';
   selector: 'app-theme-switcher',
   standalone: true,
   template: `
-    <div class="theme-switcher" aria-label="Theme">
+    <div class="theme-switcher btn-group" role="group" aria-label="Theme">
       @for (theme of themeService.themes; track theme.value) {
         <button
           type="button"
-          class="theme-option"
+          class="btn btn-sm theme-option"
+          [class.btn-primary]="themeService.currentTheme() === theme.value"
+          [class.btn-outline-secondary]="themeService.currentTheme() !== theme.value"
           [class.active]="themeService.currentTheme() === theme.value"
           [attr.aria-pressed]="themeService.currentTheme() === theme.value"
           (click)="changeTheme(theme.value)"
