@@ -75,36 +75,60 @@ The project is tracked in GitHub Project with milestones:
 
 ## Local Development
 
-The project will use:
+There are two ways to run the project locally:
 
-- local `SQL Server` in Docker
-- backend migrations via `EF Core`
-- Angular frontend running locally during development
+- **Full stack in Docker** — everything (SQL Server, backend, frontend) runs in containers. Best for a quick "just run it" setup.
+- **Backend and frontend locally** — only SQL Server runs in Docker, while the backend and Angular app run on the host with hot reload. Best for active development.
+
+### Prerequisites
+
+| Tool | Version | Used for |
+| --- | --- | --- |
+| [Docker](https://docs.docker.com/get-docker/) + Docker Compose v2 | latest | SQL Server, and optionally the full stack |
+| [.NET SDK](https://dotnet.microsoft.com/download) | `10.0` | building and running the backend, EF Core migrations |
+| [Node.js](https://nodejs.org/) | `20+` (LTS) | building and running the Angular frontend |
+
+On Windows, the connection-string and migration commands below use Bash syntax, so run them from **Git Bash**. PowerShell equivalents are provided where it matters.
+
+### Required Configuration
+
+Copy the example environment file and fill in the values:
+
+```bash
+cp .env.example .env
+```
+
+`docker-compose.yml` reads these variables from `.env`. `MSSQL_SA_PASSWORD` and `JWT_SIGNING_KEY` are **required** — Docker Compose refuses to start without them.
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `MSSQL_SA_PASSWORD` | yes | `ChangeMe123!` | SQL Server `sa` password. Must be strong: upper/lowercase letters, a number, and a symbol. |
+| `JWT_SIGNING_KEY` | yes | local dev key | Secret key used to sign JWT auth tokens. Change before production. |
+| `TODOAPP_DB_NAME` | no | `TodoAppDb` | Application database name. |
+| `FRONTEND_PORT` | no | `4200` | Host port for the frontend. |
+| `BACKEND_PORT` | no | `8080` | Host port for the backend API. |
+| `MSSQL_PORT` | no | `1433` | Host port for SQL Server. |
+| `MSSQL_PID` | no | `Developer` | SQL Server edition. |
+
+The tracked `appsettings*.json` files intentionally keep `ConnectionStrings:DefaultConnection` empty so database credentials are never committed. The backend receives the connection string and JWT key from the environment instead.
 
 ### Full Stack in Docker
 
-1. Create a local environment file:
+1. Create and configure `.env` as described in [Required Configuration](#required-configuration).
 
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Update `MSSQL_SA_PASSWORD` in `.env`.
-   SQL Server requires a strong password with upper/lowercase letters, numbers, and a symbol.
-
-3. Start the full application stack:
+2. Start the full application stack:
 
    ```bash
    docker compose up -d --build
    ```
 
-4. Check that the containers are running:
+3. Check that the containers are running:
 
    ```bash
    docker compose ps
    ```
 
-5. Open the apps:
+4. Open the apps:
 
    - Frontend: `http://localhost:4200`
    - Backend Swagger: `http://localhost:8080/swagger`
@@ -115,6 +139,46 @@ The frontend container proxies `/api/*` requests to the backend container, so th
 The SQL Server files are stored in a Docker named volume called `sqlserver-data`, so data persists between container restarts without relying on a host bind mount.
 
 The backend applies pending EF Core migrations during startup. When `docker compose up -d --build` starts the backend after SQL Server becomes healthy, the database schema is created from the tracked migrations without manual SQL.
+
+### Run Backend and Frontend Locally
+
+For active development, run only SQL Server in Docker and start the backend and frontend on the host.
+
+1. Start just the database:
+
+   ```bash
+   docker compose up -d sqlserver
+   ```
+
+2. Start the backend. The backend reads its connection string and JWT key from the environment, so set them before `dotnet run`. Use the same `MSSQL_SA_PASSWORD` and `JWT_SIGNING_KEY` values from your `.env`.
+
+   Git Bash:
+
+   ```bash
+   export ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
+   export Jwt__SigningKey='<your-jwt-signing-key>'
+   dotnet run --project src/backend/TodoApp.Api/TodoApp.Api.csproj
+   ```
+
+   PowerShell:
+
+   ```powershell
+   $env:ConnectionStrings__DefaultConnection = 'Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
+   $env:Jwt__SigningKey = '<your-jwt-signing-key>'
+   dotnet run --project src/backend/TodoApp.Api/TodoApp.Api.csproj
+   ```
+
+   The backend applies any pending migrations on startup and serves the API at `http://localhost:8080` (Swagger at `/swagger`).
+
+3. In a separate terminal, install dependencies and start the Angular dev server:
+
+   ```bash
+   cd src/frontend/todo-ui
+   npm install
+   npm start
+   ```
+
+   The dev server runs at `http://localhost:4200` and proxies `/api/*` requests to the backend at `http://localhost:8080` (configured in `proxy.conf.json`), so no extra setup is needed.
 
 ### Database Migrations
 
@@ -150,12 +214,7 @@ Use the same `MSSQL_SA_PASSWORD` value that is configured in `.env`. The first m
 
 The backend container receives `ConnectionStrings__DefaultConnection` automatically through `docker-compose.yml` and targets the `sqlserver` service on the internal Docker network. The tracked `appsettings*.json` files intentionally keep `ConnectionStrings:DefaultConnection` empty so database credentials are not committed.
 
-When running the backend directly from Git Bash, set the connection string through the environment before `dotnet run`:
-
-```bash
-export ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
-dotnet run --project src/backend/TodoApp.Api/TodoApp.Api.csproj
-```
+To run the backend directly against this database, see [Run Backend and Frontend Locally](#run-backend-and-frontend-locally).
 
 ### DBeaver
 
