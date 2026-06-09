@@ -57,6 +57,7 @@
 
 .dialog-actions {
   display: flex;
+  flex-direction: column-reverse;
   gap: 0.65rem;
   justify-content: flex-end;
 }
@@ -77,6 +78,7 @@
     border-color var(--transition-control),
     box-shadow var(--transition-control),
     transform var(--transition-control);
+  width: 100%;
 }
 
 .secondary-button {
@@ -115,13 +117,13 @@ button:disabled {
   transform: none;
 }
 
-@media (max-width: 520px) {
+@media (min-width: 521px) {
   .dialog-actions {
-    flex-direction: column-reverse;
+    flex-direction: row;
   }
 
   .secondary-button,
   .danger-button {
-    width: 100%;
+    width: auto;
   }
 }

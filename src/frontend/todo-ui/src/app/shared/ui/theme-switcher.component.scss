@@ -22,6 +22,7 @@
   font-size: 0.82rem;
   font-weight: 800;
   gap: 0.4rem;
+  justify-content: center;
   min-height: 2rem;
   min-width: 0;
   padding: 0.35rem 0.55rem;
@@ -62,8 +63,8 @@
   background: #202940;
 }
 
-@media (max-width: 720px) {
+@media (min-width: 721px) {
   .theme-option {
-    justify-content: center;
+    justify-content: flex-start;
   }
 }
