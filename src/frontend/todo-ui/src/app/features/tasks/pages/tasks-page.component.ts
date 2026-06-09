@@ -9,6 +9,7 @@ import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
 import { ConfirmationDialogComponent } from '../../../shared/ui/confirmation-dialog.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
+import { buildTaskCardColorRules, getTaskCardColorClass } from '../task-card-colors.utils';
 import { PagedResult, TaskItem } from '../task.models';
 import { TasksService } from '../tasks.service';
 
@@ -374,9 +375,7 @@ export class TasksPageComponent implements OnDestroy {
   }
 
   protected taskCardColorClass(task: TaskItem): string {
-    return task.categoryId && this.getTaskCategoryColor(task)
-      ? `task-card-${this.toCssIdentifier(task.id)}`
-      : 'task-category-empty';
+    return getTaskCardColorClass(task, this.categories());
   }
 
   protected totalPages(): number {
@@ -397,16 +396,7 @@ export class TasksPageComponent implements OnDestroy {
   }
 
   private syncTaskCardStyles(tasks: TaskItem[]): void {
-    const rules = tasks
-      .filter((task) => task.categoryId && this.isHexColor(this.getTaskCategoryColor(task)))
-      .map((task) => {
-        const background = this.normalizeHexColor(this.getTaskCategoryColor(task) as string);
-        const textColor = this.getReadableTextColor(background);
-        const mutedColor = this.getReadableMutedTextColor(textColor);
-        const className = this.toCssIdentifier(task.id);
-
-        return `.task-item.task-card-${className}{--task-card-bg:${background};--task-card-text:${textColor};--task-card-muted:${mutedColor};background:${background};border-color:${background};}`;
-      });
+    const rules = buildTaskCardColorRules(tasks, this.categories());
 
     if (rules.length === 0) {
       this.taskCardStyleElement?.remove();
@@ -421,61 +411,5 @@ export class TasksPageComponent implements OnDestroy {
     }
 
     this.taskCardStyleElement.textContent = Array.from(new Set(rules)).join('');
-  }
-
-  private getReadableTextColor(background: string): '#111827' | '#ffffff' {
-    const darkText = '#111827';
-    const lightText = '#ffffff';
-    const darkContrast = this.getContrastRatio(background, darkText);
-    const lightContrast = this.getContrastRatio(background, lightText);
-
-    return darkContrast >= lightContrast ? darkText : lightText;
-  }
-
-  private getReadableMutedTextColor(textColor: '#111827' | '#ffffff'): string {
-    return textColor;
-  }
-
-  private getContrastRatio(firstColor: string, secondColor: string): number {
-    const firstLuminance = this.getRelativeLuminance(firstColor);
-    const secondLuminance = this.getRelativeLuminance(secondColor);
-    const lighter = Math.max(firstLuminance, secondLuminance);
-    const darker = Math.min(firstLuminance, secondLuminance);
-
-    return (lighter + 0.05) / (darker + 0.05);
-  }
-
-  private getRelativeLuminance(color: string): number {
-    const normalizedColor = color.replace('#', '');
-    const red = Number.parseInt(normalizedColor.slice(0, 2), 16);
-    const middleChannel = Number.parseInt(normalizedColor.slice(2, 4), 16);
-    const blue = Number.parseInt(normalizedColor.slice(4, 6), 16);
-    const [linearRed, linearMiddle, linearBlue] = [red, middleChannel, blue].map((channel) => {
-      const value = channel / 255;
-
-      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-    });
-
-    return 0.2126 * linearRed + 0.7152 * linearMiddle + 0.0722 * linearBlue;
-  }
-
-  private getTaskCategoryColor(task: TaskItem): string | null {
-    if (this.isHexColor(task.categoryColor)) {
-      return task.categoryColor;
-    }
-
-    return this.categories().find((category) => category.id === task.categoryId)?.color ?? null;
-  }
-
-  private isHexColor(value: string | null): value is string {
-    return /^#?[\da-f]{6}$/i.test(value ?? '');
-  }
-
-  private normalizeHexColor(value: string): string {
-    return value.startsWith('#') ? value : `#${value}`;
-  }
-
-  private toCssIdentifier(value: string): string {
-    return value.replace(/[^\da-z]/gi, '');
   }
 }

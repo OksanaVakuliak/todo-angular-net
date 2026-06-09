@@ -10,6 +10,7 @@ import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
 import { TaskItem, UpdateTaskRequest } from '../task.models';
+import { toDateControlValue, toDueAtIsoString } from '../task-date.utils';
 import { TasksService } from '../tasks.service';
 
 @Component({
@@ -162,7 +163,7 @@ export class EditTaskPageComponent {
       categoryId: formValue.categoryId || null,
       title: formValue.title.trim(),
       description: formValue.description.trim() || null,
-      dueAt: this.toDueAtIsoString(formValue.dueDate),
+      dueAt: toDueAtIsoString(formValue.dueDate),
       isCompleted: formValue.isCompleted
     };
   }
@@ -204,23 +205,8 @@ export class EditTaskPageComponent {
       title: task.title,
       description: task.description ?? '',
       categoryId: task.categoryId ?? '',
-      dueDate: dueDateTime ? this.toDateControlValue(dueDateTime) : null,
+      dueDate: dueDateTime ? toDateControlValue(dueDateTime) : null,
       isCompleted: task.isCompleted
     });
-  }
-
-  private toDueAtIsoString(dueDate: Date | null): string | null {
-    if (!dueDate) {
-      return null;
-    }
-
-    const date = new Date(dueDate);
-    date.setHours(0, 0, 0, 0);
-
-    return date.toISOString();
-  }
-
-  private toDateControlValue(value: Date): Date {
-    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
   }
 }

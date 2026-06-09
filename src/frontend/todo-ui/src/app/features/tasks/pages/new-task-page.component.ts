@@ -10,6 +10,7 @@ import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
 import { CreateTaskRequest } from '../task.models';
+import { toDueAtIsoString } from '../task-date.utils';
 import { TasksService } from '../tasks.service';
 
 @Component({
@@ -138,19 +139,8 @@ export class NewTaskPageComponent {
       categoryId: formValue.categoryId || null,
       title: formValue.title.trim(),
       description: formValue.description.trim() || null,
-      dueAt: this.toDueAtIsoString(formValue.dueDate)
+      dueAt: toDueAtIsoString(formValue.dueDate)
     };
-  }
-
-  private toDueAtIsoString(dueDate: Date | null): string | null {
-    if (!dueDate) {
-      return null;
-    }
-
-    const date = new Date(dueDate);
-    date.setHours(0, 0, 0, 0);
-
-    return date.toISOString();
   }
 
   private loadCategories(): void {
