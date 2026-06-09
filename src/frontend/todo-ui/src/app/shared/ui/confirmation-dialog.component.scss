@@ -1,0 +1,127 @@
+.dialog-backdrop {
+  align-items: center;
+  background: var(--color-backdrop, rgba(15, 23, 42, 0.5));
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1rem;
+  position: fixed;
+  z-index: 20;
+}
+
+.dialog {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-strong);
+  color: var(--color-text);
+  display: grid;
+  gap: 1rem;
+  max-width: 28rem;
+  padding: 1.25rem;
+  width: min(100%, 28rem);
+}
+
+.dialog-icon {
+  align-items: center;
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-border);
+  border-radius: 999px;
+  color: var(--color-danger);
+  display: inline-flex;
+  font-size: 1.15rem;
+  font-weight: 900;
+  height: 2.5rem;
+  justify-content: center;
+  width: 2.5rem;
+}
+
+.dialog-content {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.dialog-content h2,
+.dialog-content p {
+  margin: 0;
+}
+
+.dialog-content h2 {
+  font-size: 1.15rem;
+}
+
+.dialog-content p {
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.secondary-button,
+.danger-button {
+  align-items: center;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 2.6rem;
+  padding: 0.7rem 0.95rem;
+  transition:
+    background-color var(--transition-control),
+    border-color var(--transition-control),
+    box-shadow var(--transition-control),
+    transform var(--transition-control);
+}
+
+.secondary-button {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.secondary-button:hover {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border-strong);
+  transform: translateY(-1px);
+}
+
+.secondary-button:focus-visible,
+.danger-button:focus-visible {
+  box-shadow: var(--shadow-focus);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 0.2rem;
+}
+
+.danger-button {
+  background: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  color: #ffffff;
+}
+
+.danger-button:hover {
+  background: var(--color-danger-hover);
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  transform: none;
+}
+
+@media (max-width: 520px) {
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .secondary-button,
+  .danger-button {
+    width: 100%;
+  }
+}

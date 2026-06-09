@@ -1,6 +1,7 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ConfirmationDialogComponent } from '../../../shared/ui/confirmation-dialog.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
 import { Category, CreateCategoryRequest, UpdateCategoryRequest } from '../category.models';
 import { CategoriesService } from '../categories.service';
@@ -8,7 +9,7 @@ import { CategoriesService } from '../categories.service';
 @Component({
   selector: 'app-categories-page',
   standalone: true,
-  imports: [PageIntroComponent, ReactiveFormsModule],
+  imports: [ConfirmationDialogComponent, PageIntroComponent, ReactiveFormsModule],
   template: `
     <app-page-intro
       eyebrow="Categories"
@@ -57,7 +58,14 @@ import { CategoriesService } from '../categories.service';
             <p>{{ categorySummary() }}</p>
           </div>
 
-          <button type="button" class="ghost-button" (click)="loadCategories()">Refresh</button>
+          <button
+            type="button"
+            class="ghost-button"
+            [disabled]="isLoading()"
+            (click)="loadCategories()"
+          >
+            {{ isLoading() ? 'Refreshing...' : 'Refresh' }}
+          </button>
         </div>
 
         @if (listErrorMessage()) {
@@ -97,9 +105,9 @@ import { CategoriesService } from '../categories.service';
                     type="button"
                     class="danger-button"
                     [disabled]="deletingCategoryId() === category.id"
-                    (click)="deleteCategory(category)"
+                    (click)="requestCategoryDelete(category)"
                   >
-                    Delete
+                    {{ deletingCategoryId() === category.id ? 'Deleting...' : 'Delete' }}
                   </button>
                 </div>
               </li>
@@ -108,6 +116,17 @@ import { CategoriesService } from '../categories.service';
         }
       </section>
     </section>
+
+    <app-confirmation-dialog
+      [isOpen]="categoryPendingDelete() !== null"
+      [isBusy]="deletingCategoryId() === categoryPendingDelete()?.id"
+      title="Delete category?"
+      [message]="deleteCategoryMessage()"
+      confirmLabel="Delete category"
+      busyLabel="Deleting..."
+      (cancelled)="cancelCategoryDelete()"
+      (confirmed)="confirmCategoryDelete()"
+    />
   `,
   styleUrl: './categories-page.component.scss'
 })
@@ -116,8 +135,9 @@ export class CategoriesPageComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
 
-  protected readonly fallbackColor = '#0f766e';
+  protected readonly fallbackColor = '#8cc0eb';
   protected readonly categories = signal<Category[]>([]);
+  protected readonly categoryPendingDelete = signal<Category | null>(null);
   protected readonly deletingCategoryId = signal<string | null>(null);
   protected readonly editingCategoryId = signal<string | null>(null);
   protected readonly formErrorMessage = signal('');
@@ -153,12 +173,14 @@ export class CategoriesPageComponent {
     return count === 1 ? '1 category available' : `${count} categories available`;
   }
 
-  protected deleteCategory(category: Category): void {
-    const confirmed = window.confirm(
-      `Delete "${category.name}"? Tasks assigned to it will move to No category.`
-    );
+  protected cancelCategoryDelete(): void {
+    this.categoryPendingDelete.set(null);
+  }
 
-    if (!confirmed) {
+  protected confirmCategoryDelete(): void {
+    const category = this.categoryPendingDelete();
+
+    if (!category) {
       return;
     }
 
@@ -171,6 +193,7 @@ export class CategoriesPageComponent {
       .subscribe({
         next: () => {
           this.deletingCategoryId.set(null);
+          this.categoryPendingDelete.set(null);
           if (this.editingCategoryId() === category.id) {
             this.cancelEdit();
           }
@@ -183,6 +206,14 @@ export class CategoriesPageComponent {
           this.deletingCategoryId.set(null);
         }
       });
+  }
+
+  protected deleteCategoryMessage(): string {
+    const category = this.categoryPendingDelete();
+
+    return category
+      ? `This will delete "${category.name}". Tasks assigned to it will move to No category.`
+      : '';
   }
 
   protected loadCategories(): void {
@@ -246,6 +277,10 @@ export class CategoriesPageComponent {
         this.isSaving.set(false);
       }
     });
+  }
+
+  protected requestCategoryDelete(category: Category): void {
+    this.categoryPendingDelete.set(category);
   }
 
   protected startEdit(category: Category): void {

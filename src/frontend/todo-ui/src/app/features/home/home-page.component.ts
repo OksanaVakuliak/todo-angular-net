@@ -1,0 +1,73 @@
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+@Component({
+  selector: 'app-home-page',
+  standalone: true,
+  imports: [RouterLink],
+  template: `
+    <section class="home-page" aria-labelledby="home-title">
+      <div class="home-copy">
+        <p class="eyebrow">Task planning, without the noise</p>
+        <h1 id="home-title">Keep daily work clear, visible, and easy to finish.</h1>
+        <p class="lead">
+          To-Do App helps you capture tasks, group them by category, find the right item quickly,
+          and keep your list moving without losing context.
+        </p>
+
+        <div class="home-actions">
+          <a class="primary-button" routerLink="/register">Create account</a>
+          <a class="ghost-button" routerLink="/login">Sign in</a>
+        </div>
+      </div>
+
+      <div class="home-preview" aria-label="App preview">
+        <div class="preview-header">
+          <span>Today</span>
+          <strong>4 tasks</strong>
+        </div>
+
+        <ul class="preview-list">
+          <li>
+            <span class="status-dot active"></span>
+            <div>
+              <strong>Plan the next sprint</strong>
+              <span>Work · Due today</span>
+            </div>
+          </li>
+          <li>
+            <span class="status-dot"></span>
+            <div>
+              <strong>Update shopping list</strong>
+              <span>Personal · No rush</span>
+            </div>
+          </li>
+          <li>
+            <span class="status-dot done"></span>
+            <div>
+              <strong>Review completed tasks</strong>
+              <span>Done · Archived in place</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="home-details" aria-label="What you can do">
+        <article>
+          <h2>Organize by category</h2>
+          <p>Give every task a context and color so priorities are easier to scan.</p>
+        </article>
+        <article>
+          <h2>Search and filter</h2>
+          <p>Use title search and category filters to get back to the right task faster.</p>
+        </article>
+        <article>
+          <h2>Choose your theme</h2>
+          <p>Switch between light and dark modes while keeping the interface consistent.</p>
+        </article>
+      </div>
+    </section>
+  `,
+  styleUrl: './home-page.component.scss'
+})
+export class HomePageComponent {}

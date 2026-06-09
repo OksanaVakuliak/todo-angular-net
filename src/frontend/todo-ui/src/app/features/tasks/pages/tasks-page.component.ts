@@ -1,18 +1,30 @@
-import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, DestroyRef, OnDestroy, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
+import { ConfirmationDialogComponent } from '../../../shared/ui/confirmation-dialog.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
+import { buildTaskCardColorRules, getTaskCardColorClass } from '../task-card-colors.utils';
 import { PagedResult, TaskItem } from '../task.models';
 import { TasksService } from '../tasks.service';
 
 @Component({
   selector: 'app-tasks-page',
   standalone: true,
-  imports: [CommonModule, PageIntroComponent, ReactiveFormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    ConfirmationDialogComponent,
+    MatFormFieldModule,
+    MatSelectModule,
+    PageIntroComponent,
+    ReactiveFormsModule,
+    RouterLink
+  ],
   template: `
     <app-page-intro
       eyebrow="Tasks"
@@ -27,7 +39,9 @@ import { TasksService } from '../tasks.service';
           <p>{{ taskSummary() }}</p>
         </div>
 
-        <button type="button" class="ghost-button" (click)="loadTasks()">Refresh</button>
+        <button type="button" class="ghost-button" [disabled]="isLoading()" (click)="loadTasks()">
+          {{ isLoading() ? 'Refreshing...' : 'Refresh' }}
+        </button>
       </div>
 
       <form class="filters" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
@@ -36,18 +50,27 @@ import { TasksService } from '../tasks.service';
           <input type="search" formControlName="search" placeholder="Search by title" />
         </label>
 
-        <label>
-          Category
-          <select formControlName="categoryId">
-            <option value="">All categories</option>
-            @for (category of categories(); track category.id) {
-              <option [value]="category.id">{{ category.name }}</option>
-            }
-          </select>
-        </label>
+        <div class="filter-control">
+          <mat-form-field class="app-material-field filter-field">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="categoryId">
+              <mat-option value="">All categories</mat-option>
+              @for (category of categories(); track category.id) {
+                <mat-option [value]="category.id">{{ category.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
 
         <div class="filter-actions">
-          <button type="button" class="ghost-button" (click)="clearFilters()">Clear</button>
+          <button
+            type="button"
+            class="ghost-button"
+            [disabled]="!hasActiveFilters() || isLoading()"
+            (click)="clearFilters()"
+          >
+            Clear
+          </button>
           <button type="submit" class="primary-button">Apply</button>
         </div>
       </form>
@@ -60,13 +83,17 @@ import { TasksService } from '../tasks.service';
         <p class="muted">Loading tasks...</p>
       } @else if (tasksResult().items.length === 0) {
         <div class="empty-state">
-          <h3>No tasks yet</h3>
-          <p>Create your first task from the New Task page or adjust the filters.</p>
+          <h3>{{ hasActiveFilters() ? 'No matching tasks' : 'No tasks yet' }}</h3>
+          <p>{{ emptyStateMessage() }}</p>
         </div>
       } @else {
         <ul class="task-list">
           @for (task of tasksResult().items; track task.id) {
-            <li class="task-item" [class.completed]="task.isCompleted">
+            <li
+              class="task-item"
+              [class.completed]="task.isCompleted"
+              [ngClass]="taskCardColorClass(task)"
+            >
               <div class="task-main">
                 <label class="completion-toggle">
                   <input
@@ -78,18 +105,18 @@ import { TasksService } from '../tasks.service';
                   <span>{{ task.isCompleted ? 'Completed' : 'Open' }}</span>
                 </label>
 
-                <h3>{{ task.title }}</h3>
-
-                @if (task.description) {
-                  <p class="description">{{ task.description }}</p>
-                }
-
                 <div class="meta">
                   <span>{{ task.categoryName ?? 'No category' }}</span>
                   @if (task.dueAt) {
                     <span>Due {{ task.dueAt | date: 'mediumDate' }}</span>
                   }
                 </div>
+
+                <h3>{{ task.title }}</h3>
+
+                @if (task.description) {
+                  <p class="description">{{ task.description }}</p>
+                }
               </div>
 
               <div class="task-actions">
@@ -98,9 +125,9 @@ import { TasksService } from '../tasks.service';
                   type="button"
                   class="danger-button"
                   [disabled]="deletingTaskId() === task.id"
-                  (click)="deleteTask(task)"
+                  (click)="requestTaskDelete(task)"
                 >
-                  Delete
+                  {{ deletingTaskId() === task.id ? 'Deleting...' : 'Delete' }}
                 </button>
               </div>
             </li>
@@ -109,6 +136,8 @@ import { TasksService } from '../tasks.service';
       }
 
       <div class="pagination" aria-label="Task pagination">
+        <span>{{ pageRangeSummary() }}</span>
+
         <button
           type="button"
           class="ghost-button"
@@ -130,22 +159,36 @@ import { TasksService } from '../tasks.service';
         </button>
       </div>
     </section>
+
+    <app-confirmation-dialog
+      [isOpen]="taskPendingDelete() !== null"
+      [isBusy]="deletingTaskId() === taskPendingDelete()?.id"
+      title="Delete task?"
+      [message]="deleteTaskMessage()"
+      confirmLabel="Delete task"
+      busyLabel="Deleting..."
+      (cancelled)="cancelTaskDelete()"
+      (confirmed)="confirmTaskDelete()"
+    />
   `,
   styleUrl: './tasks-page.component.scss'
 })
-export class TasksPageComponent {
+export class TasksPageComponent implements OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   private readonly categoriesService = inject(CategoriesService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly tasksService = inject(TasksService);
   private readonly pageSize = 10;
   private latestLoadId = 0;
+  private taskCardStyleElement: HTMLStyleElement | null = null;
 
   protected readonly categories = signal<Category[]>([]);
   protected readonly currentPage = signal(1);
   protected readonly deletingTaskId = signal<string | null>(null);
   protected readonly errorMessage = signal('');
   protected readonly isLoading = signal(false);
+  protected readonly taskPendingDelete = signal<TaskItem | null>(null);
   protected readonly updatingTaskId = signal<string | null>(null);
   protected readonly tasksResult = signal<PagedResult<TaskItem>>({
     items: [],
@@ -163,6 +206,10 @@ export class TasksPageComponent {
   constructor() {
     this.loadCategories();
     this.loadTasks();
+  }
+
+  ngOnDestroy(): void {
+    this.taskCardStyleElement?.remove();
   }
 
   protected applyFilters(): void {
@@ -209,10 +256,14 @@ export class TasksPageComponent {
       });
   }
 
-  protected deleteTask(task: TaskItem): void {
-    const confirmed = window.confirm(`Delete "${task.title}"?`);
+  protected cancelTaskDelete(): void {
+    this.taskPendingDelete.set(null);
+  }
 
-    if (!confirmed) {
+  protected confirmTaskDelete(): void {
+    const task = this.taskPendingDelete();
+
+    if (!task) {
       return;
     }
 
@@ -225,6 +276,7 @@ export class TasksPageComponent {
       .subscribe({
         next: () => {
           this.deletingTaskId.set(null);
+          this.taskPendingDelete.set(null);
           this.loadTasks();
         },
         error: (error) => {
@@ -234,6 +286,20 @@ export class TasksPageComponent {
           this.deletingTaskId.set(null);
         }
       });
+  }
+
+  protected deleteTaskMessage(): string {
+    const task = this.taskPendingDelete();
+
+    return task
+      ? `This will permanently delete "${task.title}". This action cannot be undone.`
+      : '';
+  }
+
+  protected emptyStateMessage(): string {
+    return this.hasActiveFilters()
+      ? 'Try a different search term or category filter.'
+      : 'Create your first task from the New Task page.';
   }
 
   protected loadTasks(): void {
@@ -262,6 +328,7 @@ export class TasksPageComponent {
             ...result,
             totalPages: Math.max(result.totalPages, 1)
           });
+          this.syncTaskCardStyles(result.items);
           this.currentPage.set(result.page);
           this.isLoading.set(false);
         },
@@ -278,10 +345,37 @@ export class TasksPageComponent {
       });
   }
 
+  protected hasActiveFilters(): boolean {
+    const filters = this.filtersForm.getRawValue();
+
+    return filters.search.trim().length > 0 || filters.categoryId.length > 0;
+  }
+
+  protected pageRangeSummary(): string {
+    const result = this.tasksResult();
+
+    if (result.totalItems === 0) {
+      return 'No tasks to show';
+    }
+
+    const firstItem = (result.page - 1) * result.limit + 1;
+    const lastItem = Math.min(result.page * result.limit, result.totalItems);
+
+    return `Showing ${firstItem}-${lastItem} of ${result.totalItems}`;
+  }
+
+  protected requestTaskDelete(task: TaskItem): void {
+    this.taskPendingDelete.set(task);
+  }
+
   protected taskSummary(): string {
     const result = this.tasksResult();
 
     return result.totalItems === 1 ? '1 task found' : `${result.totalItems} tasks found`;
+  }
+
+  protected taskCardColorClass(task: TaskItem): string {
+    return getTaskCardColorClass(task, this.categories());
   }
 
   protected totalPages(): number {
@@ -293,8 +387,29 @@ export class TasksPageComponent {
       .listCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (categories) => this.categories.set(categories),
+        next: (categories) => {
+          this.categories.set(categories);
+          this.syncTaskCardStyles(this.tasksResult().items);
+        },
         error: () => this.categories.set([])
       });
+  }
+
+  private syncTaskCardStyles(tasks: TaskItem[]): void {
+    const rules = buildTaskCardColorRules(tasks, this.categories());
+
+    if (rules.length === 0) {
+      this.taskCardStyleElement?.remove();
+      this.taskCardStyleElement = null;
+      return;
+    }
+
+    if (!this.taskCardStyleElement) {
+      this.taskCardStyleElement = this.document.createElement('style');
+      this.taskCardStyleElement.setAttribute('data-task-card-colors', 'true');
+      this.document.head.appendChild(this.taskCardStyleElement);
+    }
+
+    this.taskCardStyleElement.textContent = Array.from(new Set(rules)).join('');
   }
 }

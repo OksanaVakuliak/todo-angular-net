@@ -1,21 +1,368 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
 * {
   box-sizing: border-box;
 }
 
+:root,
+:root[data-theme='light'] {
+  --palette-1: #fff9d2;
+  --palette-2: #ffebcc;
+  --palette-3: #bfddf0;
+  --palette-4: #8cc0eb;
+  --color-bg: #fffdf1;
+  --color-app: #f7fbff;
+  --color-backdrop: rgba(39, 54, 74, 0.36);
+  --color-sidebar: #e8f2fb;
+  --color-bg-strong: #fff9d2;
+  --color-surface: #ffffff;
+  --color-surface-raised: #fdfefe;
+  --color-surface-muted: #edf6fd;
+  --color-border: #c9ddea;
+  --color-border-strong: #8cc0eb;
+  --color-text: #27364a;
+  --color-muted: #607086;
+  --color-primary: #2f77bd;
+  --color-primary-hover: #245f98;
+  --color-primary-soft: #e8f5ff;
+  --color-primary-text: #ffffff;
+  --color-accent: #8cc0eb;
+  --color-accent-strong: #ffebcc;
+  --color-focus: #8cc0eb;
+  --color-info-soft: #fff9d2;
+  --color-info-border: #ffebcc;
+  --color-info-text: #4e6380;
+  --shadow-soft: 0 1.5rem 4rem rgba(39, 54, 74, 0.1);
+  --shadow-strong: 0 1.5rem 4rem rgba(39, 54, 74, 0.22);
+  --shadow-focus: 0 0 0 0.2rem rgba(140, 192, 235, 0.26);
+  --shadow-item: 0 0.75rem 1.5rem color-mix(in srgb, var(--color-text) 6%, transparent);
+  --shadow-item-hover: 0 1rem 2rem color-mix(in srgb, var(--color-text) 10%, transparent);
+  --transition-control: 160ms ease;
+  --material-overlay-bg: var(--color-surface);
+  --material-overlay-text: var(--color-text);
+  --material-overlay-muted: var(--color-muted);
+  --material-scrollbar-thumb: var(--color-border-strong);
+  --material-scrollbar-track: var(--color-surface);
+}
+
+:root[data-theme='dark'] {
+  --palette-1: #202940;
+  --palette-2: #4b4038;
+  --palette-3: #9a8678;
+  --palette-4: #caaa98;
+  --color-bg: #151b2b;
+  --color-app: #111725;
+  --color-backdrop: rgba(5, 8, 15, 0.62);
+  --color-sidebar: #202940;
+  --color-bg-strong: #202940;
+  --color-surface: #202940;
+  --color-surface-raised: rgba(32, 41, 64, 0.96);
+  --color-surface-muted: #2a344d;
+  --color-border: #4b556c;
+  --color-border-strong: #9a8678;
+  --color-text: #f8efe9;
+  --color-muted: #caaa98;
+  --color-primary: #caaa98;
+  --color-primary-hover: #e0bda6;
+  --color-primary-soft: #4b4038;
+  --color-primary-text: #202940;
+  --color-accent: #9a8678;
+  --color-accent-strong: #caaa98;
+  --color-focus: #caaa98;
+  --color-danger-soft: #4a2026;
+  --color-danger-border: #7f313d;
+  --color-danger-text: #ffd8de;
+  --color-info-soft: #2a344d;
+  --color-info-border: #4b556c;
+  --color-info-text: #f8efe9;
+  --shadow-soft: 0 1.5rem 4rem rgba(0, 0, 0, 0.24);
+  --shadow-strong: 0 1.5rem 4rem rgba(0, 0, 0, 0.38);
+  --shadow-focus: 0 0 0 0.2rem rgba(202, 170, 152, 0.24);
+}
+
 html {
   min-height: 100%;
+  overflow-x: clip;
 }
 
 body {
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   margin: 0;
   min-height: 100%;
+  overflow-x: clip;
+  width: 100%;
+}
+
+app-root {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.primary-button,
+.ghost-button,
+.danger-button {
+  align-items: center;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 2.6rem;
+  padding: 0.7rem 0.95rem;
+  text-decoration: none;
+  transition: all var(--transition-control);
+}
+
+.primary-button {
+  background: var(--color-primary);
+  border: 0;
+  color: var(--color-primary-text);
+}
+
+.primary-button:hover {
+  background: var(--color-primary-hover);
+}
+
+.ghost-button {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.ghost-button:hover {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border-strong);
+}
+
+.danger-button {
+  background: var(--color-surface);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+.danger-button:hover {
+  background: var(--color-danger-soft);
+}
+
+.primary-button:focus-visible,
+.ghost-button:focus-visible,
+.danger-button:focus-visible {
+  box-shadow: var(--shadow-focus);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 0.2rem;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.app-material-field {
+  --mdc-filled-text-field-active-indicator-color: var(--color-border);
+  --mdc-filled-text-field-caret-color: var(--color-text);
+  --mdc-filled-text-field-container-color: var(--color-surface);
+  --mdc-filled-text-field-disabled-container-color: var(--color-surface-muted);
+  --mdc-filled-text-field-focus-active-indicator-color: var(--color-focus);
+  --mdc-filled-text-field-focus-label-text-color: var(--color-focus);
+  --mdc-filled-text-field-hover-active-indicator-color: var(--color-border-strong);
+  --mdc-filled-text-field-input-text-color: var(--color-text);
+  --mdc-filled-text-field-label-text-color: var(--color-muted);
+  --mdc-filled-text-field-supporting-text-color: var(--color-muted);
+  --mat-form-field-container-height: 3rem;
+  --mat-form-field-container-vertical-padding: 0.55rem;
+  --mat-form-field-filled-with-label-container-padding-top: 1rem;
+  --mat-form-field-filled-with-label-container-padding-bottom: 0.35rem;
+  --mat-select-enabled-arrow-color: var(--color-primary);
+  --mat-select-focused-arrow-color: var(--color-focus);
+  --mat-select-enabled-trigger-text-color: var(--color-text);
+  --mat-select-placeholder-text-color: var(--color-muted);
+  display: block;
+  width: 100%;
+}
+
+.app-material-field .mat-mdc-text-field-wrapper {
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  transition:
+    background-color var(--transition-control),
+    border-color var(--transition-control),
+    box-shadow var(--transition-control),
+    transform var(--transition-control);
+}
+
+.app-material-field .mat-mdc-text-field-wrapper:hover {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
+  transform: translateY(-1px);
+}
+
+.app-material-field.mat-focused .mat-mdc-text-field-wrapper {
+  background: var(--color-surface-raised);
+  border-color: var(--color-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.app-material-field .mdc-line-ripple {
+  display: none;
+}
+
+.app-material-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.filter-field .mat-mdc-text-field-wrapper,
+.filter-field .mat-mdc-form-field-flex,
+.filter-field .mat-mdc-form-field-infix {
+  min-height: var(--filter-control-height);
+}
+
+.filter-field .mat-mdc-text-field-wrapper {
+  height: var(--filter-control-height);
+}
+
+.filter-field .mat-mdc-form-field-infix {
+  padding-bottom: 0.35rem;
+  padding-top: 0.65rem;
+}
+
+.cdk-overlay-pane {
+  --mat-datepicker-calendar-container-background-color: var(--material-overlay-bg);
+  --mat-datepicker-calendar-container-text-color: var(--material-overlay-text);
+  --mat-datepicker-calendar-date-text-color: var(--material-overlay-text);
+  --mat-datepicker-calendar-body-label-text-color: var(--material-overlay-text);
+  --mat-datepicker-calendar-header-text-color: var(--material-overlay-text);
+  --mat-datepicker-calendar-period-button-text-color: var(--material-overlay-text);
+  --mat-datepicker-calendar-navigation-button-icon-color: var(--color-primary);
+  --mat-datepicker-calendar-date-today-outline-color: var(--color-primary);
+  --mat-datepicker-calendar-date-selected-state-background-color: var(--color-primary);
+  --mat-datepicker-calendar-date-selected-state-text-color: var(--color-primary-text);
+  --mat-datepicker-calendar-date-hover-state-background-color: var(--color-surface-muted);
+  --mat-select-panel-background-color: var(--material-overlay-bg);
+  --mat-select-enabled-trigger-text-color: var(--material-overlay-text);
+  --mat-option-label-text-color: var(--material-overlay-text);
+  --mat-option-hover-state-layer-color: var(--color-surface-muted);
+  --mat-option-selected-state-layer-color: var(--color-surface-muted);
+}
+
+.mat-mdc-select-panel,
+.mat-datepicker-content,
+.mat-calendar,
+.mat-calendar-content,
+.mat-calendar-header {
+  background: var(--material-overlay-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-strong);
+  color: var(--material-overlay-text);
+}
+
+.mat-mdc-select-panel {
+  padding: 0.35rem;
+}
+
+.mat-mdc-select-panel {
+  scrollbar-color: var(--material-scrollbar-thumb) var(--material-scrollbar-track);
+  scrollbar-width: thin;
+}
+
+.mat-mdc-select-panel::-webkit-scrollbar {
+  width: 0.45rem;
+}
+
+.mat-mdc-select-panel::-webkit-scrollbar-track {
+  background: var(--material-scrollbar-track);
+  border-radius: 999px;
+}
+
+.mat-mdc-select-panel::-webkit-scrollbar-thumb {
+  background: var(--material-scrollbar-thumb);
+  border: 2px solid var(--material-scrollbar-track);
+  border-radius: 999px;
+}
+
+.mat-mdc-select-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+.mat-mdc-option,
+.mat-mdc-option .mdc-list-item__primary-text {
+  color: var(--material-overlay-text);
+  transition:
+    background-color var(--transition-control),
+    color var(--transition-control);
+}
+
+.mat-mdc-option:hover,
+.mat-mdc-option.mdc-list-item--selected {
+  background: var(--color-surface-muted);
+}
+
+.mat-calendar,
+.mat-calendar-body-cell-content,
+.mat-calendar-body-label,
+.mat-calendar-table-header,
+.mat-calendar-period-button {
+  color: var(--material-overlay-text);
+}
+
+.mat-calendar-body-cell-content,
+.mat-calendar-period-button,
+.mat-calendar-previous-button,
+.mat-calendar-next-button,
+.mat-datepicker-toggle {
+  transition:
+    background-color var(--transition-control),
+    border-color var(--transition-control),
+    box-shadow var(--transition-control),
+    color var(--transition-control),
+    transform var(--transition-control);
+}
+
+.mat-calendar-arrow,
+.mat-calendar-previous-button,
+.mat-calendar-next-button,
+.mat-datepicker-toggle {
+  color: var(--color-primary);
+}
+
+.mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover
+  .mat-calendar-body-cell-content {
+  background: var(--color-surface-muted);
+  transform: scale(1.04);
+}
+
+.mat-calendar-body-cell.mat-calendar-body-active .mat-calendar-body-cell-content {
+  box-shadow: var(--shadow-focus);
+}
+
+.mat-calendar-body-selected {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+}
+
+.mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: var(--color-primary);
 }

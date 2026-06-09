@@ -11,6 +11,7 @@ describe('TasksService', () => {
     userId: '8c520c67-35d7-4f5f-85ea-a0332c4c7a15',
     categoryId: 'b05d82eb-32cd-4e3a-8700-d8b7f68e39f0',
     categoryName: 'Work',
+    categoryColor: '#0f766e',
     title: 'Review task UI',
     description: 'Check CRUD screens',
     isCompleted: false,

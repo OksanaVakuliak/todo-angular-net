@@ -1,6 +1,14 @@
 <div class="shell">
-  <header class="topbar">
+  <aside class="sidebar">
     <a class="brand" routerLink="/tasks" aria-label="To-Do App home">To-Do App</a>
+
+    <div class="sidebar-footer" aria-label="Account actions">
+      <app-theme-switcher />
+      @if (authService.currentUser(); as user) {
+        <span class="account-name">{{ user.displayName }}</span>
+      }
+      <button type="button" class="logout-button" (click)="logout()">Sign out</button>
+    </div>
 
     <nav class="nav">
       <a routerLink="/tasks" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
@@ -9,14 +17,7 @@
       <a routerLink="/tasks/new" routerLinkActive="active">New Task</a>
       <a routerLink="/categories" routerLinkActive="active">Categories</a>
     </nav>
-
-    <div class="account-actions" aria-label="Account actions">
-      @if (authService.currentUser(); as user) {
-        <span class="account-name">{{ user.displayName }}</span>
-      }
-      <button type="button" (click)="logout()">Sign out</button>
-    </div>
-  </header>
+  </aside>
 
   <main class="content">
     <router-outlet></router-outlet>

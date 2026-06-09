@@ -1,92 +1,152 @@
 .shell {
-  background: #f8fafc;
+  --shell-max-width: 88rem;
+  display: grid;
+  grid-template-columns: minmax(12rem, 13rem) minmax(0, 1fr);
+  margin: 0 auto;
   min-height: 100vh;
+  padding: 1.5rem;
+  width: min(100%, var(--shell-max-width));
 }
 
-.topbar {
-  align-items: center;
-  background: rgba(255, 255, 255, 0.94);
-  border-bottom: 1px solid #e2e8f0;
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
-  padding: 1rem 2rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+.shell > * {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.sidebar {
+  background: var(--color-sidebar);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem 0 0 0.5rem;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+  padding: 1.5rem 0.75rem;
 }
 
 .brand {
-  color: #0f172a;
-  font-size: 1.15rem;
-  font-weight: 800;
+  align-items: center;
+  color: var(--color-text);
+  display: inline-flex;
+  font-size: 1.05rem;
+  font-weight: 900;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0 0.65rem;
   text-decoration: none;
+}
+
+.brand::before {
+  background: var(--color-primary);
+  border-radius: 0.35rem;
+  content: '';
+  display: inline-flex;
+  height: 1.35rem;
+  width: 1.35rem;
 }
 
 .nav {
-  align-items: center;
-  display: flex;
-  gap: 0.25rem;
-  justify-content: center;
+  display: grid;
+  gap: 0.35rem;
 }
 
 .nav a,
-.account-actions button {
+.sidebar-footer button {
   border: 0;
-  border-radius: 0.5rem;
-  color: #475569;
+  border-radius: 0.45rem;
+  color: var(--color-muted);
   cursor: pointer;
   font: inherit;
-  font-weight: 700;
-  padding: 0.65rem 0.9rem;
+  font-weight: 800;
+  padding: 0.75rem 0.8rem;
+  text-align: left;
   text-decoration: none;
+  transition: all var(--transition-control);
+  width: 100%;
 }
 
 .nav a.active,
 .nav a:hover,
-.account-actions button:hover {
-  background: #e0f2fe;
-  color: #075985;
+.sidebar-footer button:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
 }
 
-.account-actions {
-  align-items: center;
-  display: flex;
-  gap: 0.25rem;
-  justify-self: end;
+.brand:focus-visible,
+.nav a:focus-visible,
+.sidebar-footer button:focus-visible {
+  box-shadow: var(--shadow-focus);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 0.2rem;
+}
+
+.sidebar-footer {
+  display: grid;
+  gap: 0.5rem;
 }
 
 .account-name {
-  color: #334155;
+  background: var(--color-surface-muted);
+  border-radius: 0.45rem;
+  color: var(--color-muted);
+  font-size: 0.9rem;
   font-weight: 800;
-  padding: 0.65rem 0.4rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 0.75rem 0.8rem;
+}
+
+.logout-button {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+}
+
+.logout-button:hover {
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
 }
 
 .content {
-  margin: 0 auto;
-  max-width: 72rem;
-  padding: 2.5rem 2rem;
-  width: 100%;
+  background: var(--color-app);
+  border: 1px solid var(--color-border);
+  border-left: 0;
+  border-radius: 0 0.5rem 0.5rem 0;
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+  padding: 2rem;
 }
 
-@media (max-width: 720px) {
-  .topbar {
+@media (max-width: 1200px) {
+  .shell {
+    --shell-max-width: 62rem;
+    grid-template-columns: minmax(11rem, 16rem) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .shell {
+    --shell-max-width: 46rem;
     grid-template-columns: 1fr;
-    justify-items: start;
     padding: 1rem;
   }
 
-  .nav {
-    justify-content: start;
-    overflow-x: auto;
-    width: 100%;
-  }
-
-  .account-actions {
-    justify-self: start;
+  .sidebar,
+  .content {
+    border-radius: 0.5rem;
   }
 
   .content {
-    padding: 1.5rem 1rem;
+    border-left: 1px solid var(--color-border);
+    margin-top: 1rem;
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell {
+    --shell-max-width: 34rem;
   }
 }
