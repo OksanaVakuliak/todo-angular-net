@@ -138,10 +138,6 @@ button:focus {
 }
 
 @media (max-width: 520px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
   .actions {
     align-items: stretch;
     flex-direction: column-reverse;

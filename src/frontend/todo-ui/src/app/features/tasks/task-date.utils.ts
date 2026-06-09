@@ -3,8 +3,7 @@ export function toDueAtIsoString(dueDate: Date | null): string | null {
     return null;
   }
 
-  const date = new Date(dueDate);
-  date.setHours(0, 0, 0, 0);
+  const date = new Date(Date.UTC(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate()));
 
   return date.toISOString();
 }
