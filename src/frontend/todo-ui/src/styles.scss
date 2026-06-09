@@ -4,15 +4,10 @@
 
 :root,
 :root[data-theme='light'] {
-  --palette-1: #fff9d2;
-  --palette-2: #ffebcc;
-  --palette-3: #bfddf0;
-  --palette-4: #8cc0eb;
   --color-bg: #fffdf1;
   --color-app: #f7fbff;
   --color-backdrop: rgba(39, 54, 74, 0.36);
   --color-sidebar: #e8f2fb;
-  --color-bg-strong: #fff9d2;
   --color-surface: #ffffff;
   --color-surface-raised: #fdfefe;
   --color-surface-muted: #edf6fd;
@@ -22,19 +17,13 @@
   --color-muted: #607086;
   --color-primary: #2f77bd;
   --color-primary-hover: #245f98;
-  --color-primary-soft: #e8f5ff;
   --color-primary-text: #ffffff;
   --color-accent: #8cc0eb;
-  --color-accent-strong: #ffebcc;
   --color-focus: #8cc0eb;
   --color-danger: #c0392b;
-  --color-danger-hover: #a13226;
   --color-danger-soft: #fdecea;
   --color-danger-border: #f0b8b1;
   --color-danger-text: #8c2c20;
-  --color-info-soft: #fff9d2;
-  --color-info-border: #ffebcc;
-  --color-info-text: #4e6380;
   --shadow-soft: 0 1.5rem 4rem rgba(39, 54, 74, 0.1);
   --shadow-strong: 0 1.5rem 4rem rgba(39, 54, 74, 0.22);
   --shadow-focus: 0 0 0 0.2rem rgba(140, 192, 235, 0.26);
@@ -44,15 +33,10 @@
 }
 
 :root[data-theme='dark'] {
-  --palette-1: #202940;
-  --palette-2: #4b4038;
-  --palette-3: #9a8678;
-  --palette-4: #caaa98;
   --color-bg: #151b2b;
   --color-app: #111725;
   --color-backdrop: rgba(5, 8, 15, 0.62);
   --color-sidebar: #202940;
-  --color-bg-strong: #202940;
   --color-surface: #202940;
   --color-surface-raised: rgba(32, 41, 64, 0.96);
   --color-surface-muted: #2a344d;
@@ -62,19 +46,13 @@
   --color-muted: #caaa98;
   --color-primary: #caaa98;
   --color-primary-hover: #e0bda6;
-  --color-primary-soft: #4b4038;
   --color-primary-text: #202940;
   --color-accent: #9a8678;
-  --color-accent-strong: #caaa98;
   --color-focus: #caaa98;
   --color-danger: #f08a7e;
-  --color-danger-hover: #f5a99f;
   --color-danger-soft: #4a2026;
   --color-danger-border: #7f313d;
   --color-danger-text: #ffd8de;
-  --color-info-soft: #2a344d;
-  --color-info-border: #4b556c;
-  --color-info-text: #f8efe9;
   --shadow-soft: 0 1.5rem 4rem rgba(0, 0, 0, 0.24);
   --shadow-strong: 0 1.5rem 4rem rgba(0, 0, 0, 0.38);
   --shadow-focus: 0 0 0 0.2rem rgba(202, 170, 152, 0.24);
