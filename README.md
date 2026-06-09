@@ -188,10 +188,13 @@ EF Core CLI is tracked as a local .NET tool. Restore it before creating or apply
 dotnet tool restore
 ```
 
+The EF tooling boots the API startup project, so it needs **both** the connection string and `Jwt__SigningKey` in the environment — otherwise it fails with `JWT signing key is missing from configuration`. Use the same `MSSQL_SA_PASSWORD` and `JWT_SIGNING_KEY` values from your `.env`.
+
 Create a migration from the repository root:
 
 ```bash
 export ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
+export Jwt__SigningKey='<your-jwt-signing-key>'
 dotnet tool run dotnet-ef -- migrations add <MigrationName> --project src/backend/TodoApp.DataAccess/TodoApp.DataAccess.csproj --startup-project src/backend/TodoApp.Api/TodoApp.Api.csproj --output-dir Persistence/Migrations
 ```
 
@@ -199,10 +202,11 @@ Apply migrations to the local Docker SQL Server instance:
 
 ```bash
 export ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=TodoAppDb;User Id=sa;Password=<your-password>;TrustServerCertificate=True;Encrypt=True'
+export Jwt__SigningKey='<your-jwt-signing-key>'
 dotnet tool run dotnet-ef -- database update --project src/backend/TodoApp.DataAccess/TodoApp.DataAccess.csproj --startup-project src/backend/TodoApp.Api/TodoApp.Api.csproj
 ```
 
-Use the same `MSSQL_SA_PASSWORD` value that is configured in `.env`. The first migration creates the EF migrations history table, and later migrations will evolve the schema from code-first model changes.
+The first migration creates the EF migrations history table, and later migrations will evolve the schema from code-first model changes. To inspect what is already applied, run `dotnet tool run dotnet-ef -- migrations list` with the same project flags.
 
 ### Connection Details
 
@@ -264,14 +268,8 @@ src/
 
 Current status:
 
-- project planning completed
-- GitHub issues created
-- repository bootstrap in progress
-
-## Next Steps
-
-1. Initialize `.NET` solution and backend projects
-2. Initialize Angular application
-3. Configure SQL Server in Docker
-4. Add EF Core and first migration
-5. Implement authentication and task management features
+- .NET solution and backend projects in place (`Api`, `Services`, `Interfaces`, `DataAccess`)
+- Angular application scaffolded with auth, tasks, and categories features
+- SQL Server, backend, and frontend orchestrated with Docker Compose
+- EF Core code-first migrations tracked and applied on startup
+- authentication (JWT) and task/category management implemented
