@@ -123,12 +123,13 @@ app-root {
 
 .btn-outline-secondary {
   --bs-btn-color: var(--color-text);
-  --bs-btn-border-color: var(--color-border);
+  --bs-btn-border-color: var(--color-border-strong);
+  --bs-btn-bg: var(--color-surface);
   --bs-btn-hover-bg: var(--color-surface-muted);
-  --bs-btn-hover-border-color: var(--color-border-strong);
+  --bs-btn-hover-border-color: var(--color-primary);
   --bs-btn-hover-color: var(--color-text);
   --bs-btn-active-bg: var(--color-surface-muted);
-  --bs-btn-active-border-color: var(--color-border-strong);
+  --bs-btn-active-border-color: var(--color-primary);
   --bs-btn-active-color: var(--color-text);
 }
 

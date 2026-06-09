@@ -9,15 +9,15 @@
   z-index: 1055;
 }
 
-.modal-dialog {
-  margin: 0;
-  width: min(100%, 28rem);
+.dialog-panel {
+  box-shadow: var(--shadow-strong);
+  max-width: 28rem;
+  width: 100%;
 }
 
 .modal-content {
   background: var(--color-surface);
   border-color: var(--color-border);
-  box-shadow: var(--shadow-strong);
   color: var(--color-text);
 }
 
