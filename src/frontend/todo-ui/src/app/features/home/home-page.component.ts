@@ -16,8 +16,8 @@ import { RouterLink } from '@angular/router';
         </p>
 
         <div class="home-actions">
-          <a class="primary-button" routerLink="/register">Create account</a>
-          <a class="ghost-button" routerLink="/login">Sign in</a>
+          <a class="btn btn-primary btn-lg" routerLink="/register">Create account</a>
+          <a class="btn btn-outline-secondary btn-lg" routerLink="/login">Sign in</a>
         </div>
       </div>
 

@@ -97,18 +97,6 @@
   padding: 0.75rem 0.8rem;
 }
 
-.logout-button {
-  background: var(--color-surface-muted);
-  border: 1px solid var(--color-border);
-  color: var(--color-muted);
-}
-
-.logout-button:hover {
-  background: var(--color-surface);
-  border-color: var(--color-border-strong);
-  color: var(--color-text);
-}
-
 .content {
   background: var(--color-app);
   border: 1px solid var(--color-border);
