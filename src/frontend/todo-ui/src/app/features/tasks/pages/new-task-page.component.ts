@@ -55,15 +55,25 @@ import { TasksService } from '../tasks.service';
       </label>
 
       <div class="form-grid">
-        <mat-form-field class="app-material-field">
-          <mat-label>Category</mat-label>
-          <mat-select formControlName="categoryId">
-            <mat-option value="">No category</mat-option>
-            @for (category of categories(); track category.id) {
-              <mat-option [value]="category.id">{{ category.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <div class="field-control">
+          <span id="newTaskCategoryLabel" class="field-label">Category</span>
+          <mat-form-field class="app-material-field">
+            <mat-select
+              formControlName="categoryId"
+              aria-labelledby="newTaskCategoryLabel"
+              [disabled]="isLoadingCategories()"
+            >
+              @if (isLoadingCategories()) {
+                <mat-option value="">Loading categories...</mat-option>
+              } @else {
+                <mat-option value="">No category</mat-option>
+                @for (category of categories(); track category.id) {
+                  <mat-option [value]="category.id">{{ category.name }}</mat-option>
+                }
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
 
         <mat-form-field class="app-material-field">
           <mat-label>Due date</mat-label>
@@ -72,6 +82,15 @@ import { TasksService } from '../tasks.service';
           <mat-datepicker #dueDatePicker />
         </mat-form-field>
       </div>
+
+      @if (categoryErrorMessage()) {
+        <div class="form-notice error-notice">
+          <p>{{ categoryErrorMessage() }}</p>
+          <button type="button" class="secondary-action" (click)="loadCategories()">
+            Retry categories
+          </button>
+        </div>
+      }
 
       @if (errorMessage()) {
         <p class="form-alert">{{ errorMessage() }}</p>
@@ -95,7 +114,9 @@ export class NewTaskPageComponent {
   private readonly tasksService = inject(TasksService);
 
   protected readonly categories = signal<Category[]>([]);
+  protected readonly categoryErrorMessage = signal('');
   protected readonly errorMessage = signal('');
+  protected readonly isLoadingCategories = signal(false);
   protected readonly isSubmitting = signal(false);
 
   protected readonly taskForm = this.formBuilder.nonNullable.group({
@@ -143,13 +164,28 @@ export class NewTaskPageComponent {
     };
   }
 
-  private loadCategories(): void {
+  protected loadCategories(): void {
+    this.isLoadingCategories.set(true);
+    this.categoryErrorMessage.set('');
+
     this.categoriesService
       .listCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (categories) => this.categories.set(categories),
-        error: () => this.categories.set([])
+        next: (categories) => {
+          this.categories.set(categories);
+          this.isLoadingCategories.set(false);
+        },
+        error: (error) => {
+          this.categories.set([]);
+          this.categoryErrorMessage.set(
+            this.categoriesService.getErrorMessage(
+              error,
+              'Categories could not load. You can still create the task without a category.'
+            )
+          );
+          this.isLoadingCategories.set(false);
+        }
       });
   }
 }

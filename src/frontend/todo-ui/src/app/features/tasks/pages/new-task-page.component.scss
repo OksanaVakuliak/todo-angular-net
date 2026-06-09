@@ -14,7 +14,7 @@
 .form-grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 label {
@@ -23,6 +23,18 @@ label {
   font-size: 0.9rem;
   font-weight: 700;
   gap: 0.4rem;
+}
+
+.field-control {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.field-label {
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 input:not(.mat-mdc-input-element),
@@ -62,13 +74,34 @@ textarea:focus {
   outline: none;
 }
 
-.form-alert {
+.form-alert,
+.form-notice {
   background: var(--color-danger-soft);
   border-radius: 0.5rem;
   color: var(--color-danger-text);
   font-weight: 700;
   margin: 0;
   padding: 0.85rem 1rem;
+}
+
+.form-notice {
+  align-items: start;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form-notice p {
+  margin: 0;
+}
+
+.secondary-action {
+  background: var(--color-surface);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+}
+
+.secondary-action:hover {
+  background: var(--color-danger-soft);
 }
 
 .loading-message {
@@ -78,13 +111,20 @@ textarea:focus {
 }
 
 .actions {
-  align-items: center;
   border-top: 1px solid var(--color-border);
   display: flex;
+  align-items: stretch;
+  flex-direction: column-reverse;
   gap: 0.75rem;
   justify-content: flex-end;
   margin-top: 0.25rem;
   padding-top: 1rem;
+}
+
+.actions a,
+.actions button {
+  text-align: center;
+  width: 100%;
 }
 
 .actions a {
@@ -137,21 +177,26 @@ button:focus {
   outline: none;
 }
 
-@media (max-width: 520px) {
+.secondary-action:hover,
+.secondary-action:focus {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
+}
+
+@media (min-width: 521px) {
   .actions {
-    align-items: stretch;
-    flex-direction: column-reverse;
+    align-items: center;
+    flex-direction: row;
   }
 
   .actions a,
-  button {
-    text-align: center;
-    width: 100%;
+  .actions button {
+    width: auto;
   }
 }
 
-@media (max-width: 900px) {
+@media (min-width: 901px) {
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

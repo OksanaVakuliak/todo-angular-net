@@ -7,7 +7,9 @@
       @if (authService.currentUser(); as user) {
         <span class="account-name">{{ user.displayName }}</span>
       }
-      <button type="button" class="logout-button" (click)="logout()">Sign out</button>
+      <div class="account-actions">
+        <button type="button" class="logout-button" (click)="logout()">Sign out</button>
+      </div>
     </div>
 
     <nav class="nav">

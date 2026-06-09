@@ -1,10 +1,10 @@
 .shell {
-  --shell-max-width: 88rem;
+  --shell-max-width: 34rem;
   display: grid;
-  grid-template-columns: minmax(12rem, 13rem) minmax(0, 1fr);
+  grid-template-columns: 1fr;
   margin: 0 auto;
   min-height: 100vh;
-  padding: 1.5rem;
+  padding: 1rem;
   width: min(100%, var(--shell-max-width));
 }
 
@@ -16,7 +16,7 @@
 .sidebar {
   background: var(--color-sidebar);
   border: 1px solid var(--color-border);
-  border-radius: 0.5rem 0 0 0.5rem;
+  border-radius: 0.5rem;
   box-shadow: var(--shadow-soft);
   display: flex;
   flex-direction: column;
@@ -112,41 +112,41 @@
 .content {
   background: var(--color-app);
   border: 1px solid var(--color-border);
-  border-left: 0;
-  border-radius: 0 0.5rem 0.5rem 0;
+  border-radius: 0.5rem;
   box-shadow: var(--shadow-soft);
+  margin-top: 1rem;
   min-width: 0;
-  padding: 2rem;
+  padding: 1.25rem;
 }
 
-@media (max-width: 1200px) {
+@media (min-width: 561px) {
+  .shell {
+    --shell-max-width: 46rem;
+  }
+}
+
+@media (min-width: 901px) {
   .shell {
     --shell-max-width: 62rem;
     grid-template-columns: minmax(11rem, 16rem) minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 900px) {
-  .shell {
-    --shell-max-width: 46rem;
-    grid-template-columns: 1fr;
-    padding: 1rem;
+    padding: 1.5rem;
   }
 
-  .sidebar,
-  .content {
-    border-radius: 0.5rem;
+  .sidebar {
+    border-radius: 0.5rem 0 0 0.5rem;
   }
 
   .content {
-    border-left: 1px solid var(--color-border);
-    margin-top: 1rem;
-    padding: 1.25rem;
+    border-left: 0;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin-top: 0;
+    padding: 2rem;
   }
 }
 
-@media (max-width: 560px) {
+@media (min-width: 1201px) {
   .shell {
-    --shell-max-width: 34rem;
+    --shell-max-width: 88rem;
+    grid-template-columns: minmax(12rem, 13rem) minmax(0, 1fr);
   }
 }

@@ -9,7 +9,6 @@ import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
 import { ConfirmationDialogComponent } from '../../../shared/ui/confirmation-dialog.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
-import { buildTaskCardColorRules, getTaskCardColorClass } from '../task-card-colors.utils';
 import { PagedResult, TaskItem } from '../task.models';
 import { TasksService } from '../tasks.service';
 
@@ -51,8 +50,8 @@ import { TasksService } from '../tasks.service';
         </label>
 
         <div class="filter-control">
+          <span class="filter-label">Category</span>
           <mat-form-field class="app-material-field filter-field">
-            <mat-label>Category</mat-label>
             <mat-select formControlName="categoryId">
               <mat-option value="">All categories</mat-option>
               @for (category of categories(); track category.id) {
@@ -75,12 +74,30 @@ import { TasksService } from '../tasks.service';
         </div>
       </form>
 
-      @if (errorMessage()) {
-        <p class="alert error">{{ errorMessage() }}</p>
+      @if (categoryErrorMessage()) {
+        <div class="filter-notice" role="status">
+          <p>{{ categoryErrorMessage() }}</p>
+          <button type="button" class="ghost-button" (click)="loadCategories()">
+            Retry categories
+          </button>
+        </div>
       }
 
-      @if (isLoading()) {
-        <p class="muted">Loading tasks...</p>
+      @if (showInlineRefreshMessage()) {
+        <p class="muted status-message" role="status">Refreshing tasks...</p>
+      }
+
+      @if (showInitialLoading()) {
+        <div class="loading-state" role="status" aria-live="polite">
+          <span class="loading-dot"></span>
+          <p>Loading tasks...</p>
+        </div>
+      } @else if (showLoadErrorState()) {
+        <div class="empty-state error-state">
+          <h3>Tasks could not load</h3>
+          <p>{{ errorMessage() }}</p>
+          <button type="button" class="ghost-button" (click)="loadTasks()">Try again</button>
+        </div>
       } @else if (tasksResult().items.length === 0) {
         <div class="empty-state">
           <h3>{{ hasActiveFilters() ? 'No matching tasks' : 'No tasks yet' }}</h3>
@@ -92,7 +109,6 @@ import { TasksService } from '../tasks.service';
             <li
               class="task-item"
               [class.completed]="task.isCompleted"
-              [ngClass]="taskCardColorClass(task)"
             >
               <div class="task-main">
                 <label class="completion-toggle">
@@ -106,7 +122,9 @@ import { TasksService } from '../tasks.service';
                 </label>
 
                 <div class="meta">
-                  <span>{{ task.categoryName ?? 'No category' }}</span>
+                  <span class="category-pill" [ngClass]="categoryPillClass(task)">
+                    {{ task.categoryName ?? 'No category' }}
+                  </span>
                   @if (task.dueAt) {
                     <span>Due {{ task.dueAt | date: 'mediumDate' }}</span>
                   }
@@ -181,13 +199,15 @@ export class TasksPageComponent implements OnDestroy {
   private readonly tasksService = inject(TasksService);
   private readonly pageSize = 10;
   private latestLoadId = 0;
-  private taskCardStyleElement: HTMLStyleElement | null = null;
+  private categoryBadgeStyleElement: HTMLStyleElement | null = null;
 
   protected readonly categories = signal<Category[]>([]);
+  protected readonly categoryErrorMessage = signal('');
   protected readonly currentPage = signal(1);
   protected readonly deletingTaskId = signal<string | null>(null);
   protected readonly errorMessage = signal('');
   protected readonly isLoading = signal(false);
+  protected readonly hasLoadedTasks = signal(false);
   protected readonly taskPendingDelete = signal<TaskItem | null>(null);
   protected readonly updatingTaskId = signal<string | null>(null);
   protected readonly tasksResult = signal<PagedResult<TaskItem>>({
@@ -209,7 +229,7 @@ export class TasksPageComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.taskCardStyleElement?.remove();
+    this.categoryBadgeStyleElement?.remove();
   }
 
   protected applyFilters(): void {
@@ -328,8 +348,9 @@ export class TasksPageComponent implements OnDestroy {
             ...result,
             totalPages: Math.max(result.totalPages, 1)
           });
-          this.syncTaskCardStyles(result.items);
+          this.syncCategoryBadgeStyles(result.items);
           this.currentPage.set(result.page);
+          this.hasLoadedTasks.set(true);
           this.isLoading.set(false);
         },
         error: (error) => {
@@ -340,6 +361,7 @@ export class TasksPageComponent implements OnDestroy {
           this.errorMessage.set(
             this.tasksService.getErrorMessage(error, 'Unable to load tasks.')
           );
+          this.hasLoadedTasks.set(true);
           this.isLoading.set(false);
         }
       });
@@ -374,42 +396,129 @@ export class TasksPageComponent implements OnDestroy {
     return result.totalItems === 1 ? '1 task found' : `${result.totalItems} tasks found`;
   }
 
-  protected taskCardColorClass(task: TaskItem): string {
-    return getTaskCardColorClass(task, this.categories());
+  protected categoryPillClass(task: TaskItem): string {
+    return task.categoryId && this.getTaskCategoryColor(task)
+      ? `task-category-${this.toCssIdentifier(task.categoryId)}`
+      : 'task-category-empty';
   }
 
   protected totalPages(): number {
     return Math.max(this.tasksResult().totalPages, 1);
   }
 
-  private loadCategories(): void {
+  protected showInitialLoading(): boolean {
+    return this.isLoading() && !this.hasLoadedTasks() && this.tasksResult().items.length === 0;
+  }
+
+  protected showInlineRefreshMessage(): boolean {
+    return this.isLoading() && this.hasLoadedTasks() && this.tasksResult().items.length > 0;
+  }
+
+  protected showLoadErrorState(): boolean {
+    return !this.isLoading() && this.errorMessage().length > 0 && this.tasksResult().items.length === 0;
+  }
+
+  protected loadCategories(): void {
+    this.categoryErrorMessage.set('');
+
     this.categoriesService
       .listCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (categories) => {
           this.categories.set(categories);
-          this.syncTaskCardStyles(this.tasksResult().items);
+          this.syncCategoryBadgeStyles(this.tasksResult().items);
         },
-        error: () => this.categories.set([])
+        error: (error) => {
+          this.categories.set([]);
+          this.categoryErrorMessage.set(
+            this.categoriesService.getErrorMessage(
+              error,
+              'Categories could not load. Tasks are still available, but category filters may be incomplete.'
+            )
+          );
+        }
       });
   }
 
-  private syncTaskCardStyles(tasks: TaskItem[]): void {
-    const rules = buildTaskCardColorRules(tasks, this.categories());
+  private syncCategoryBadgeStyles(tasks: TaskItem[]): void {
+    const rules = tasks
+      .filter((task) => task.categoryId && this.getTaskCategoryColor(task))
+      .map((task) => {
+        const background = this.normalizeHexColor(this.getTaskCategoryColor(task) as string);
+        const textColor = this.getReadableTextColor(background);
+        const className = this.toCssIdentifier(task.categoryId as string);
+
+        return `.task-list .task-item .meta .category-pill.task-category-${className}{--category-pill-bg:${background};--category-pill-border:${background};--category-pill-text:${textColor};background:${background};border-color:${background};color:${textColor};}`;
+      });
 
     if (rules.length === 0) {
-      this.taskCardStyleElement?.remove();
-      this.taskCardStyleElement = null;
+      this.categoryBadgeStyleElement?.remove();
+      this.categoryBadgeStyleElement = null;
       return;
     }
 
-    if (!this.taskCardStyleElement) {
-      this.taskCardStyleElement = this.document.createElement('style');
-      this.taskCardStyleElement.setAttribute('data-task-card-colors', 'true');
-      this.document.head.appendChild(this.taskCardStyleElement);
+    if (!this.categoryBadgeStyleElement) {
+      this.categoryBadgeStyleElement = this.document.createElement('style');
+      this.categoryBadgeStyleElement.setAttribute('data-category-badge-colors', 'true');
+      this.document.head.appendChild(this.categoryBadgeStyleElement);
     }
 
-    this.taskCardStyleElement.textContent = Array.from(new Set(rules)).join('');
+    this.categoryBadgeStyleElement.textContent = Array.from(new Set(rules)).join('');
+  }
+
+  private getTaskCategoryColor(task: TaskItem): string | null {
+    if (this.isHexColor(task.categoryColor)) {
+      return task.categoryColor;
+    }
+
+    const categoryColor =
+      this.categories().find((category) => category.id === task.categoryId)?.color ?? null;
+
+    return this.isHexColor(categoryColor) ? categoryColor : null;
+  }
+
+  private getReadableTextColor(background: string): '#111827' | '#ffffff' {
+    const darkText = '#111827';
+    const lightText = '#ffffff';
+    const darkContrast = this.getContrastRatio(background, darkText);
+    const lightContrast = this.getContrastRatio(background, lightText);
+
+    return darkContrast >= lightContrast ? darkText : lightText;
+  }
+
+  private getContrastRatio(firstColor: string, secondColor: string): number {
+    const firstLuminance = this.getRelativeLuminance(firstColor);
+    const secondLuminance = this.getRelativeLuminance(secondColor);
+    const lighter = Math.max(firstLuminance, secondLuminance);
+    const darker = Math.min(firstLuminance, secondLuminance);
+
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  private getRelativeLuminance(color: string): number {
+    const normalizedColor = color.replace('#', '');
+    const red = Number.parseInt(normalizedColor.slice(0, 2), 16);
+    const green = Number.parseInt(normalizedColor.slice(2, 4), 16);
+    const blue = Number.parseInt(normalizedColor.slice(4, 6), 16);
+    const [linearRed, linearGreen, linearBlue] = [red, green, blue].map((channel) => {
+      const value = channel / 255;
+
+      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    });
+
+    return 0.2126 * linearRed + 0.7152 * linearGreen + 0.0722 * linearBlue;
+  }
+
+  private isHexColor(value: string | null): value is string {
+    return /^#?[\da-f]{6}$/i.test(value ?? '');
+  }
+
+  private normalizeHexColor(value: string): string {
+    return value.startsWith('#') ? value : `#${value}`;
+  }
+
+  private toCssIdentifier(value: string): string {
+    return value.replace(/[^\da-z]/gi, '');
   }
 }

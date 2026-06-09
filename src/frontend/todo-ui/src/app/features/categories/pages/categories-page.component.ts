@@ -68,12 +68,28 @@ import { CategoriesService } from '../categories.service';
           </button>
         </div>
 
-        @if (listErrorMessage()) {
-          <p class="alert error">{{ listErrorMessage() }}</p>
+        @if (showInlineRefreshMessage()) {
+          <p class="muted status-message" role="status">Refreshing categories...</p>
         }
 
-        @if (isLoading()) {
-          <p class="muted">Loading categories...</p>
+        @if (!isLoading() && listErrorMessage() && categories().length > 0) {
+          <div class="alert error" role="alert">
+            <p>{{ listErrorMessage() }}</p>
+            <button type="button" class="ghost-button" (click)="loadCategories()">Try again</button>
+          </div>
+        }
+
+        @if (showInitialLoading()) {
+          <div class="loading-state" role="status" aria-live="polite">
+            <span class="loading-dot"></span>
+            <p>Loading categories...</p>
+          </div>
+        } @else if (showLoadErrorState()) {
+          <div class="empty-state error-state">
+            <h3>Categories could not load</h3>
+            <p>{{ listErrorMessage() }}</p>
+            <button type="button" class="ghost-button" (click)="loadCategories()">Try again</button>
+          </div>
         } @else if (categories().length === 0) {
           <div class="empty-state">
             <h3>No categories yet</h3>
@@ -98,7 +114,12 @@ import { CategoriesService } from '../categories.service';
                 </div>
 
                 <div class="category-actions">
-                  <button type="button" class="ghost-button" (click)="startEdit(category)">
+                  <button
+                    type="button"
+                    class="ghost-button"
+                    [disabled]="isSaving() || deletingCategoryId() === category.id"
+                    (click)="startEdit(category)"
+                  >
                     Edit
                   </button>
                   <button
@@ -141,6 +162,7 @@ export class CategoriesPageComponent {
   protected readonly deletingCategoryId = signal<string | null>(null);
   protected readonly editingCategoryId = signal<string | null>(null);
   protected readonly formErrorMessage = signal('');
+  protected readonly hasLoadedCategories = signal(false);
   protected readonly isLoading = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly listErrorMessage = signal('');
@@ -226,12 +248,14 @@ export class CategoriesPageComponent {
       .subscribe({
         next: (categories) => {
           this.categories.set(categories);
+          this.hasLoadedCategories.set(true);
           this.isLoading.set(false);
         },
         error: (error) => {
           this.listErrorMessage.set(
             this.categoriesService.getErrorMessage(error, 'Unable to load categories.')
           );
+          this.hasLoadedCategories.set(true);
           this.isLoading.set(false);
         }
       });
@@ -291,6 +315,18 @@ export class CategoriesPageComponent {
       color: category.color
     });
     this.categoryForm.markAsPristine();
+  }
+
+  protected showInitialLoading(): boolean {
+    return this.isLoading() && !this.hasLoadedCategories() && this.categories().length === 0;
+  }
+
+  protected showInlineRefreshMessage(): boolean {
+    return this.isLoading() && this.hasLoadedCategories() && this.categories().length > 0;
+  }
+
+  protected showLoadErrorState(): boolean {
+    return !this.isLoading() && this.listErrorMessage().length > 0 && this.categories().length === 0;
   }
 
   private buildCreateRequest(): CreateCategoryRequest {
