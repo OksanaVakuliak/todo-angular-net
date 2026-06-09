@@ -1,5 +1,5 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, DestroyRef, OnDestroy, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,7 +9,6 @@ import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
 import { ConfirmationDialogComponent } from '../../../shared/ui/confirmation-dialog.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
-import { buildTaskCardColorRules, getTaskCardColorClass } from '../task-card-colors.utils';
 import { PagedResult, TaskItem } from '../task.models';
 import { TasksService } from '../tasks.service';
 
@@ -75,12 +74,21 @@ import { TasksService } from '../tasks.service';
         </div>
       </form>
 
-      @if (errorMessage()) {
-        <p class="alert error">{{ errorMessage() }}</p>
+      @if (showInlineRefreshMessage()) {
+        <p class="muted status-message" role="status">Refreshing tasks...</p>
       }
 
-      @if (isLoading()) {
-        <p class="muted">Loading tasks...</p>
+      @if (showInitialLoading()) {
+        <div class="loading-state" role="status" aria-live="polite">
+          <span class="loading-dot"></span>
+          <p>Loading tasks...</p>
+        </div>
+      } @else if (showLoadErrorState()) {
+        <div class="empty-state error-state">
+          <h3>Tasks could not load</h3>
+          <p>{{ errorMessage() }}</p>
+          <button type="button" class="ghost-button" (click)="loadTasks()">Try again</button>
+        </div>
       } @else if (tasksResult().items.length === 0) {
         <div class="empty-state">
           <h3>{{ hasActiveFilters() ? 'No matching tasks' : 'No tasks yet' }}</h3>
@@ -92,7 +100,6 @@ import { TasksService } from '../tasks.service';
             <li
               class="task-item"
               [class.completed]="task.isCompleted"
-              [ngClass]="taskCardColorClass(task)"
             >
               <div class="task-main">
                 <label class="completion-toggle">
@@ -106,7 +113,18 @@ import { TasksService } from '../tasks.service';
                 </label>
 
                 <div class="meta">
-                  <span>{{ task.categoryName ?? 'No category' }}</span>
+                  <span class="category-pill">
+                    @if (task.categoryColor) {
+                      <input
+                        class="category-swatch"
+                        type="color"
+                        [value]="task.categoryColor"
+                        disabled
+                        aria-label="Category color"
+                      />
+                    }
+                    {{ task.categoryName ?? 'No category' }}
+                  </span>
                   @if (task.dueAt) {
                     <span>Due {{ task.dueAt | date: 'mediumDate' }}</span>
                   }
@@ -173,21 +191,20 @@ import { TasksService } from '../tasks.service';
   `,
   styleUrl: './tasks-page.component.scss'
 })
-export class TasksPageComponent implements OnDestroy {
+export class TasksPageComponent {
   private readonly destroyRef = inject(DestroyRef);
-  private readonly document = inject(DOCUMENT);
   private readonly categoriesService = inject(CategoriesService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly tasksService = inject(TasksService);
   private readonly pageSize = 10;
   private latestLoadId = 0;
-  private taskCardStyleElement: HTMLStyleElement | null = null;
 
   protected readonly categories = signal<Category[]>([]);
   protected readonly currentPage = signal(1);
   protected readonly deletingTaskId = signal<string | null>(null);
   protected readonly errorMessage = signal('');
   protected readonly isLoading = signal(false);
+  protected readonly hasLoadedTasks = signal(false);
   protected readonly taskPendingDelete = signal<TaskItem | null>(null);
   protected readonly updatingTaskId = signal<string | null>(null);
   protected readonly tasksResult = signal<PagedResult<TaskItem>>({
@@ -206,10 +223,6 @@ export class TasksPageComponent implements OnDestroy {
   constructor() {
     this.loadCategories();
     this.loadTasks();
-  }
-
-  ngOnDestroy(): void {
-    this.taskCardStyleElement?.remove();
   }
 
   protected applyFilters(): void {
@@ -328,8 +341,8 @@ export class TasksPageComponent implements OnDestroy {
             ...result,
             totalPages: Math.max(result.totalPages, 1)
           });
-          this.syncTaskCardStyles(result.items);
           this.currentPage.set(result.page);
+          this.hasLoadedTasks.set(true);
           this.isLoading.set(false);
         },
         error: (error) => {
@@ -340,6 +353,7 @@ export class TasksPageComponent implements OnDestroy {
           this.errorMessage.set(
             this.tasksService.getErrorMessage(error, 'Unable to load tasks.')
           );
+          this.hasLoadedTasks.set(true);
           this.isLoading.set(false);
         }
       });
@@ -374,12 +388,20 @@ export class TasksPageComponent implements OnDestroy {
     return result.totalItems === 1 ? '1 task found' : `${result.totalItems} tasks found`;
   }
 
-  protected taskCardColorClass(task: TaskItem): string {
-    return getTaskCardColorClass(task, this.categories());
-  }
-
   protected totalPages(): number {
     return Math.max(this.tasksResult().totalPages, 1);
+  }
+
+  protected showInitialLoading(): boolean {
+    return this.isLoading() && !this.hasLoadedTasks() && this.tasksResult().items.length === 0;
+  }
+
+  protected showInlineRefreshMessage(): boolean {
+    return this.isLoading() && this.hasLoadedTasks() && this.tasksResult().items.length > 0;
+  }
+
+  protected showLoadErrorState(): boolean {
+    return !this.isLoading() && this.errorMessage().length > 0 && this.tasksResult().items.length === 0;
   }
 
   private loadCategories(): void {
@@ -389,27 +411,8 @@ export class TasksPageComponent implements OnDestroy {
       .subscribe({
         next: (categories) => {
           this.categories.set(categories);
-          this.syncTaskCardStyles(this.tasksResult().items);
         },
         error: () => this.categories.set([])
       });
-  }
-
-  private syncTaskCardStyles(tasks: TaskItem[]): void {
-    const rules = buildTaskCardColorRules(tasks, this.categories());
-
-    if (rules.length === 0) {
-      this.taskCardStyleElement?.remove();
-      this.taskCardStyleElement = null;
-      return;
-    }
-
-    if (!this.taskCardStyleElement) {
-      this.taskCardStyleElement = this.document.createElement('style');
-      this.taskCardStyleElement.setAttribute('data-task-card-colors', 'true');
-      this.document.head.appendChild(this.taskCardStyleElement);
-    }
-
-    this.taskCardStyleElement.textContent = Array.from(new Set(rules)).join('');
   }
 }
