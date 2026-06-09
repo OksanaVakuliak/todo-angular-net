@@ -1,10 +1,6 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterLink } from '@angular/router';
 import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
@@ -16,15 +12,7 @@ import { TasksService } from '../tasks.service';
 @Component({
   selector: 'app-new-task-page',
   standalone: true,
-  imports: [
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    PageIntroComponent,
-    ReactiveFormsModule,
-    RouterLink
-  ],
+  imports: [PageIntroComponent, ReactiveFormsModule, RouterLink],
   template: `
     <app-page-intro
       eyebrow="Tasks"
@@ -32,73 +20,79 @@ import { TasksService } from '../tasks.service';
       description="Capture the task details and add it to your list."
     />
 
-    <form class="task-form" [formGroup]="taskForm" (ngSubmit)="createTask()">
-      <label>
-        Title
+    <form class="task-form card" [formGroup]="taskForm" (ngSubmit)="createTask()">
+      <div class="mb-3">
+        <label class="form-label" for="newTaskTitle">Title</label>
         <input
+          id="newTaskTitle"
+          class="form-control"
           type="text"
           formControlName="title"
           maxlength="200"
           placeholder="Task title"
           required
         />
-      </label>
+      </div>
 
-      <label>
-        Description
+      <div class="mb-3">
+        <label class="form-label" for="newTaskDescription">Description</label>
         <textarea
+          id="newTaskDescription"
+          class="form-control"
           rows="5"
           formControlName="description"
           maxlength="2000"
           placeholder="Add details"
         ></textarea>
-      </label>
+      </div>
 
-      <div class="form-grid">
-        <div class="field-control">
-          <span id="newTaskCategoryLabel" class="field-label">Category</span>
-          <mat-form-field class="app-material-field">
-            <mat-select
-              formControlName="categoryId"
-              aria-labelledby="newTaskCategoryLabel"
-              [disabled]="isLoadingCategories()"
-            >
-              @if (isLoadingCategories()) {
-                <mat-option value="">Loading categories...</mat-option>
-              } @else {
-                <mat-option value="">No category</mat-option>
-                @for (category of categories(); track category.id) {
-                  <mat-option [value]="category.id">{{ category.name }}</mat-option>
-                }
+      <div class="row g-3">
+        <div class="col-12 col-sm-6">
+          <label class="form-label" for="newTaskCategory">Category</label>
+          <select
+            id="newTaskCategory"
+            class="form-select"
+            formControlName="categoryId"
+            [attr.disabled]="isLoadingCategories() ? '' : null"
+          >
+            @if (isLoadingCategories()) {
+              <option value="">Loading categories...</option>
+            } @else {
+              <option value="">No category</option>
+              @for (category of categories(); track category.id) {
+                <option [value]="category.id">{{ category.name }}</option>
               }
-            </mat-select>
-          </mat-form-field>
+            }
+          </select>
         </div>
 
-        <mat-form-field class="app-material-field">
-          <mat-label>Due date</mat-label>
-          <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" readonly />
-          <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker" />
-          <mat-datepicker #dueDatePicker />
-        </mat-form-field>
+        <div class="col-12 col-sm-6">
+          <label class="form-label" for="newTaskDueDate">Due date</label>
+          <input
+            id="newTaskDueDate"
+            class="form-control"
+            type="date"
+            formControlName="dueDate"
+          />
+        </div>
       </div>
 
       @if (categoryErrorMessage()) {
-        <div class="form-notice error-notice">
-          <p>{{ categoryErrorMessage() }}</p>
-          <button type="button" class="secondary-action" (click)="loadCategories()">
+        <div class="alert alert-warning d-flex justify-content-between align-items-center mt-3" role="status">
+          <span>{{ categoryErrorMessage() }}</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="loadCategories()">
             Retry categories
           </button>
         </div>
       }
 
       @if (errorMessage()) {
-        <p class="form-alert">{{ errorMessage() }}</p>
+        <p class="alert alert-danger mt-3" role="alert">{{ errorMessage() }}</p>
       }
 
-      <div class="actions">
-        <a routerLink="/tasks">Cancel</a>
-        <button type="submit" [disabled]="taskForm.invalid || isSubmitting()">
+      <div class="actions d-flex justify-content-end gap-2 mt-4">
+        <a class="btn btn-outline-secondary" routerLink="/tasks">Cancel</a>
+        <button type="submit" class="btn btn-primary" [disabled]="taskForm.invalid || isSubmitting()">
           {{ isSubmitting() ? 'Creating...' : 'Create task' }}
         </button>
       </div>
@@ -123,7 +117,7 @@ export class NewTaskPageComponent {
     title: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(200)]],
     description: ['', [Validators.maxLength(2000)]],
     categoryId: [''],
-    dueDate: this.formBuilder.control<Date | null>(null)
+    dueDate: ['']
   });
 
   constructor() {

@@ -1,30 +1,18 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
 import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
 import { TaskItem, UpdateTaskRequest } from '../task.models';
-import { toDateControlValue, toDueAtIsoString } from '../task-date.utils';
+import { toDateInputValue, toDueAtIsoString } from '../task-date.utils';
 import { TasksService } from '../tasks.service';
 
 @Component({
   selector: 'app-edit-task-page',
   standalone: true,
-  imports: [
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    PageIntroComponent,
-    ReactiveFormsModule,
-    RouterLink
-  ],
+  imports: [PageIntroComponent, ReactiveFormsModule, RouterLink],
   template: `
     <app-page-intro
       eyebrow="Tasks"
@@ -33,89 +21,104 @@ import { TasksService } from '../tasks.service';
     />
 
     @if (loadErrorMessage()) {
-      <div class="task-form">
-        <p class="form-alert">{{ loadErrorMessage() }}</p>
-        <div class="actions">
-          <a routerLink="/tasks">Back to tasks</a>
+      <div class="task-form card">
+        <p class="alert alert-danger">{{ loadErrorMessage() }}</p>
+        <div class="actions d-flex justify-content-end">
+          <a class="btn btn-outline-secondary" routerLink="/tasks">Back to tasks</a>
         </div>
       </div>
     } @else if (isLoading()) {
-      <div class="task-form">
-        <p class="loading-message">Loading task...</p>
+      <div class="task-form card">
+        <p class="loading-message text-secondary m-0">Loading task...</p>
       </div>
     } @else {
-      <form class="task-form" [formGroup]="taskForm" (ngSubmit)="updateTask()">
-        <label>
-          Title
+      <form class="task-form card" [formGroup]="taskForm" (ngSubmit)="updateTask()">
+        <div class="mb-3">
+          <label class="form-label" for="editTaskTitle">Title</label>
           <input
+            id="editTaskTitle"
+            class="form-control"
             type="text"
             formControlName="title"
             maxlength="200"
             placeholder="Task title"
             required
           />
-        </label>
+        </div>
 
-        <label>
-          Description
+        <div class="mb-3">
+          <label class="form-label" for="editTaskDescription">Description</label>
           <textarea
+            id="editTaskDescription"
+            class="form-control"
             rows="5"
             formControlName="description"
             maxlength="2000"
             placeholder="Add details"
           ></textarea>
-        </label>
-
-        <div class="form-grid">
-          <div class="field-control">
-            <span id="editTaskCategoryLabel" class="field-label">Category</span>
-            <mat-form-field class="app-material-field">
-              <mat-select
-                formControlName="categoryId"
-                aria-labelledby="editTaskCategoryLabel"
-                [disabled]="isLoadingCategories()"
-              >
-                @if (isLoadingCategories()) {
-                  <mat-option value="">Loading categories...</mat-option>
-                } @else {
-                  <mat-option value="">No category</mat-option>
-                  @for (category of categories(); track category.id) {
-                    <mat-option [value]="category.id">{{ category.name }}</mat-option>
-                  }
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <mat-form-field class="app-material-field">
-            <mat-label>Due date</mat-label>
-            <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" readonly />
-            <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker" />
-            <mat-datepicker #dueDatePicker />
-          </mat-form-field>
         </div>
 
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="isCompleted" />
-          Completed
-        </label>
+        <div class="row g-3">
+          <div class="col-12 col-sm-6">
+            <label class="form-label" for="editTaskCategory">Category</label>
+            <select
+              id="editTaskCategory"
+              class="form-select"
+              formControlName="categoryId"
+              [attr.disabled]="isLoadingCategories() ? '' : null"
+            >
+              @if (isLoadingCategories()) {
+                <option value="">Loading categories...</option>
+              } @else {
+                <option value="">No category</option>
+                @for (category of categories(); track category.id) {
+                  <option [value]="category.id">{{ category.name }}</option>
+                }
+              }
+            </select>
+          </div>
+
+          <div class="col-12 col-sm-6">
+            <label class="form-label" for="editTaskDueDate">Due date</label>
+            <input
+              id="editTaskDueDate"
+              class="form-control"
+              type="date"
+              formControlName="dueDate"
+            />
+          </div>
+        </div>
+
+        <div class="form-check mt-3">
+          <input
+            id="editTaskCompleted"
+            class="form-check-input"
+            type="checkbox"
+            formControlName="isCompleted"
+          />
+          <label class="form-check-label" for="editTaskCompleted">Completed</label>
+        </div>
 
         @if (categoryErrorMessage()) {
-          <div class="form-notice error-notice">
-            <p>{{ categoryErrorMessage() }}</p>
-            <button type="button" class="secondary-action" (click)="loadCategories()">
+          <div class="alert alert-warning d-flex justify-content-between align-items-center mt-3" role="status">
+            <span>{{ categoryErrorMessage() }}</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="loadCategories()">
               Retry categories
             </button>
           </div>
         }
 
         @if (errorMessage()) {
-          <p class="form-alert">{{ errorMessage() }}</p>
+          <p class="alert alert-danger mt-3" role="alert">{{ errorMessage() }}</p>
         }
 
-        <div class="actions">
-          <a routerLink="/tasks">Cancel</a>
-          <button type="submit" [disabled]="taskForm.invalid || isSubmitting() || isLoading()">
+        <div class="actions d-flex justify-content-end gap-2 mt-4">
+          <a class="btn btn-outline-secondary" routerLink="/tasks">Cancel</a>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="taskForm.invalid || isSubmitting() || isLoading()"
+          >
             {{ isSubmitting() ? 'Saving...' : 'Save changes' }}
           </button>
         </div>
@@ -145,7 +148,7 @@ export class EditTaskPageComponent {
     title: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(200)]],
     description: ['', [Validators.maxLength(2000)]],
     categoryId: [''],
-    dueDate: this.formBuilder.control<Date | null>(null),
+    dueDate: [''],
     isCompleted: [false]
   });
 
@@ -235,13 +238,11 @@ export class EditTaskPageComponent {
   }
 
   private patchForm(task: TaskItem): void {
-    const dueDateTime = task.dueAt ? new Date(task.dueAt) : null;
-
     this.taskForm.setValue({
       title: task.title,
       description: task.description ?? '',
       categoryId: task.categoryId ?? '',
-      dueDate: dueDateTime ? toDateControlValue(dueDateTime) : null,
+      dueDate: toDateInputValue(task.dueAt ?? null),
       isCompleted: task.isCompleted
     });
   }
