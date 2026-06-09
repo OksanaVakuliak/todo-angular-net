@@ -17,30 +17,39 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
     />
 
     @if (sessionMessage) {
-      <p class="form-notice" role="status">{{ sessionMessage }}</p>
+      <p class="alert alert-info" role="status">{{ sessionMessage }}</p>
     }
 
-    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
-      <label>
-        Email
-        <input type="email" placeholder="you@example.com" autocomplete="email" formControlName="email" />
-      </label>
-
-      <label>
-        Password
+    <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="submit()">
+      <div>
+        <label class="form-label" for="loginEmail">Email</label>
         <input
+          id="loginEmail"
+          class="form-control"
+          type="email"
+          placeholder="you@example.com"
+          autocomplete="email"
+          formControlName="email"
+        />
+      </div>
+
+      <div>
+        <label class="form-label" for="loginPassword">Password</label>
+        <input
+          id="loginPassword"
+          class="form-control"
           type="password"
           placeholder="Password"
           autocomplete="current-password"
           formControlName="password"
         />
-      </label>
+      </div>
 
       @if (errorMessage) {
-        <p class="form-error" role="alert">{{ errorMessage }}</p>
+        <p class="alert alert-danger m-0" role="alert">{{ errorMessage }}</p>
       }
 
-      <button type="submit" [disabled]="loginForm.invalid || isSubmitting">
+      <button type="submit" class="btn btn-primary w-100" [disabled]="loginForm.invalid || isSubmitting">
         {{ isSubmitting ? 'Signing in...' : 'Continue' }}
       </button>
     </form>

@@ -17,31 +17,51 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro.component';
     />
 
     <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="submit()">
-      <label>
-        Name
-        <input type="text" placeholder="Your name" autocomplete="name" formControlName="displayName" />
-      </label>
-
-      <label>
-        Email
-        <input type="email" placeholder="you@example.com" autocomplete="email" formControlName="email" />
-      </label>
-
-      <label>
-        Password
+      <div>
+        <label class="form-label" for="registerName">Name</label>
         <input
+          id="registerName"
+          class="form-control"
+          type="text"
+          placeholder="Your name"
+          autocomplete="name"
+          formControlName="displayName"
+        />
+      </div>
+
+      <div>
+        <label class="form-label" for="registerEmail">Email</label>
+        <input
+          id="registerEmail"
+          class="form-control"
+          type="email"
+          placeholder="you@example.com"
+          autocomplete="email"
+          formControlName="email"
+        />
+      </div>
+
+      <div>
+        <label class="form-label" for="registerPassword">Password</label>
+        <input
+          id="registerPassword"
+          class="form-control"
           type="password"
           placeholder="Password"
           autocomplete="new-password"
           formControlName="password"
         />
-      </label>
+      </div>
 
       @if (errorMessage) {
-        <p class="form-error" role="alert">{{ errorMessage }}</p>
+        <p class="alert alert-danger m-0" role="alert">{{ errorMessage }}</p>
       }
 
-      <button type="submit" [disabled]="registerForm.invalid || isSubmitting">
+      <button
+        type="submit"
+        class="btn btn-primary w-100"
+        [disabled]="registerForm.invalid || isSubmitting"
+      >
         {{ isSubmitting ? 'Creating account...' : 'Create account' }}
       </button>
     </form>
