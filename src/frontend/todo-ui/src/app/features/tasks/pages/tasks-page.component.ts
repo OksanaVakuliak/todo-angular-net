@@ -414,7 +414,7 @@ export class TasksPageComponent {
     return !this.isLoading() && this.errorMessage().length > 0 && this.tasksResult().items.length === 0;
   }
 
-  private loadCategories(): void {
+  protected loadCategories(): void {
     this.categoryErrorMessage.set('');
 
     this.categoriesService
