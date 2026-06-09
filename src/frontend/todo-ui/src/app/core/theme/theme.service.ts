@@ -37,6 +37,7 @@ export class ThemeService {
 
   private applyTheme(theme: AppTheme): void {
     this.document.documentElement.dataset['theme'] = theme;
+    this.document.documentElement.dataset['bsTheme'] = theme;
   }
 
   private getInitialTheme(): AppTheme {

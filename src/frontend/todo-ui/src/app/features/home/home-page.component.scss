@@ -1,33 +1,15 @@
-.home-page {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.home-copy {
-  display: grid;
-  gap: 1rem;
-  max-width: 42rem;
-}
-
 .eyebrow {
   color: var(--color-primary);
   font-size: 0.78rem;
   font-weight: 900;
-  letter-spacing: 0;
-  margin: 0;
+  margin: 0 0 0.5rem;
   text-transform: uppercase;
-}
-
-h1,
-h2,
-p {
-  margin: 0;
 }
 
 h1 {
   color: var(--color-text);
   font-size: 2.35rem;
-  line-height: 1.02;
+  line-height: 1.05;
 }
 
 .lead {
@@ -37,34 +19,10 @@ h1 {
   max-width: 38rem;
 }
 
-.home-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.25rem;
-}
-
-.home-actions,
-.home-actions a {
-  width: 100%;
-}
-
-.home-preview {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  box-shadow: var(--shadow-soft);
-  display: grid;
-  gap: 1rem;
-  padding: 1rem;
-}
-
 .preview-header {
-  align-items: center;
   border-bottom: 1px solid var(--color-border);
   color: var(--color-muted);
-  display: flex;
-  justify-content: space-between;
+  margin-bottom: 1rem;
   padding-bottom: 0.8rem;
 }
 
@@ -75,9 +33,7 @@ h1 {
 .preview-list {
   display: grid;
   gap: 0.75rem;
-  list-style: none;
   margin: 0;
-  padding: 0;
 }
 
 .preview-list li {
@@ -122,52 +78,20 @@ h1 {
   background: var(--color-border-strong);
 }
 
-.home-details {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
-}
-
-.home-details article {
-  background: var(--color-surface-muted);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  padding: 1rem;
-}
-
 .home-details h2 {
   color: var(--color-text);
   font-size: 1rem;
+  margin: 0;
 }
 
 .home-details p {
   color: var(--color-muted);
   line-height: 1.55;
-  margin-top: 0.45rem;
+  margin: 0.45rem 0 0;
 }
 
 @media (min-width: 721px) {
   h1 {
-    font-size: 3.4rem;
-  }
-
-  .home-actions,
-  .home-actions a {
-    width: auto;
-  }
-
-  .home-details {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 860px) {
-  .home-page {
-    align-items: center;
-    grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr);
-  }
-
-  .home-details {
-    grid-column: 1 / -1;
+    font-size: 3.1rem;
   }
 }

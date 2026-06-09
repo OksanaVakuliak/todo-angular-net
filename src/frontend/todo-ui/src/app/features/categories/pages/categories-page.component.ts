@@ -18,35 +18,42 @@ import { CategoriesService } from '../categories.service';
     />
 
     <section class="categories-layout" aria-label="Category management">
-      <form class="category-form" [formGroup]="categoryForm" (ngSubmit)="saveCategory()">
+      <form class="category-form card" [formGroup]="categoryForm" (ngSubmit)="saveCategory()">
         <div class="form-heading">
           <h2>{{ editingCategoryId() ? 'Edit category' : 'New category' }}</h2>
           @if (editingCategoryId()) {
-            <button type="button" class="link-button" (click)="cancelEdit()">Cancel edit</button>
+            <button type="button" class="btn btn-link p-0" (click)="cancelEdit()">Cancel edit</button>
           }
         </div>
 
-        <label>
-          Name
+        <div>
+          <label class="form-label" for="categoryName">Name</label>
           <input
+            id="categoryName"
+            class="form-control"
             type="text"
             formControlName="name"
             maxlength="100"
             placeholder="Category name"
             required
           />
-        </label>
+        </div>
 
-        <label>
-          Color
-          <input type="color" formControlName="color" />
-        </label>
+        <div>
+          <label class="form-label d-block" for="categoryColor">Color</label>
+          <input
+            id="categoryColor"
+            class="form-control form-control-color"
+            type="color"
+            formControlName="color"
+          />
+        </div>
 
         @if (formErrorMessage()) {
-          <p class="form-alert">{{ formErrorMessage() }}</p>
+          <p class="alert alert-danger m-0">{{ formErrorMessage() }}</p>
         }
 
-        <button type="submit" [disabled]="categoryForm.invalid || isSaving()">
+        <button type="submit" class="btn btn-primary" [disabled]="categoryForm.invalid || isSaving()">
           {{ saveButtonText() }}
         </button>
       </form>
@@ -60,7 +67,7 @@ import { CategoriesService } from '../categories.service';
 
           <button
             type="button"
-            class="ghost-button"
+            class="btn btn-outline-secondary btn-sm"
             [disabled]="isLoading()"
             (click)="loadCategories()"
           >
@@ -73,9 +80,11 @@ import { CategoriesService } from '../categories.service';
         }
 
         @if (!isLoading() && listErrorMessage() && categories().length > 0) {
-          <div class="alert error" role="alert">
-            <p>{{ listErrorMessage() }}</p>
-            <button type="button" class="ghost-button" (click)="loadCategories()">Try again</button>
+          <div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+            <span>{{ listErrorMessage() }}</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="loadCategories()">
+              Try again
+            </button>
           </div>
         }
 
@@ -88,7 +97,9 @@ import { CategoriesService } from '../categories.service';
           <div class="empty-state error-state">
             <h3>Categories could not load</h3>
             <p>{{ listErrorMessage() }}</p>
-            <button type="button" class="ghost-button" (click)="loadCategories()">Try again</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="loadCategories()">
+              Try again
+            </button>
           </div>
         } @else if (categories().length === 0) {
           <div class="empty-state">
@@ -101,7 +112,7 @@ import { CategoriesService } from '../categories.service';
               <li class="category-item">
                 <div class="category-main">
                   <input
-                    class="category-color"
+                    class="category-color form-control form-control-color"
                     type="color"
                     [value]="category.color ?? fallbackColor"
                     disabled
@@ -116,7 +127,7 @@ import { CategoriesService } from '../categories.service';
                 <div class="category-actions">
                   <button
                     type="button"
-                    class="ghost-button"
+                    class="btn btn-sm btn-outline-secondary"
                     [disabled]="isSaving() || deletingCategoryId() === category.id"
                     (click)="startEdit(category)"
                   >
@@ -124,7 +135,7 @@ import { CategoriesService } from '../categories.service';
                   </button>
                   <button
                     type="button"
-                    class="danger-button"
+                    class="btn btn-sm btn-outline-danger"
                     [disabled]="deletingCategoryId() === category.id"
                     (click)="requestCategoryDelete(category)"
                   >

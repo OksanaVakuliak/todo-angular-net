@@ -4,10 +4,10 @@ import { Component, input } from '@angular/core';
   selector: 'app-page-intro',
   standalone: true,
   template: `
-    <header class="page-intro">
-      <p class="eyebrow">{{ eyebrow() }}</p>
-      <h1>{{ title() }}</h1>
-      <p>{{ description() }}</p>
+    <header class="page-intro text-center mb-4">
+      <p class="eyebrow text-uppercase fw-bold mb-2">{{ eyebrow() }}</p>
+      <h1 class="mb-2">{{ title() }}</h1>
+      <p class="description text-secondary mx-auto mb-0">{{ description() }}</p>
     </header>
   `,
   styleUrl: './page-intro.component.scss'

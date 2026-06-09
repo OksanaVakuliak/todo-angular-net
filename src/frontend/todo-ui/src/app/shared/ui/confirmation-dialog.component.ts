@@ -8,30 +8,36 @@ let nextDialogId = 0;
   template: `
     @if (isOpen()) {
       <div class="dialog-backdrop" role="presentation" (click)="cancel()">
-        <section
-          class="dialog"
+        <div
+          class="dialog-panel modal-content"
           role="dialog"
           aria-modal="true"
           [attr.aria-labelledby]="titleId"
           [attr.aria-describedby]="messageId"
           (click)="$event.stopPropagation()"
         >
-          <div class="dialog-icon" aria-hidden="true">!</div>
-
-          <div class="dialog-content">
-            <h2 [id]="titleId">{{ title() }}</h2>
-            <p [id]="messageId">{{ message() }}</p>
+          <div class="modal-header">
+            <h2 class="modal-title h5 m-0" [id]="titleId">{{ title() }}</h2>
           </div>
 
-          <div class="dialog-actions">
-            <button type="button" class="secondary-button" [disabled]="isBusy()" (click)="cancel()">
+          <div class="modal-body">
+            <p class="m-0" [id]="messageId">{{ message() }}</p>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              [disabled]="isBusy()"
+              (click)="cancel()"
+            >
               {{ cancelLabel() }}
             </button>
-            <button type="button" class="danger-button" [disabled]="isBusy()" (click)="confirm()">
+            <button type="button" class="btn btn-danger" [disabled]="isBusy()" (click)="confirm()">
               {{ isBusy() ? busyLabel() : confirmLabel() }}
             </button>
           </div>
-        </section>
+        </div>
       </div>
     }
   `,

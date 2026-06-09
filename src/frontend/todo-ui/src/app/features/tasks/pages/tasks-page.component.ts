@@ -2,8 +2,6 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, DestroyRef, OnDestroy, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
@@ -18,8 +16,6 @@ import { TasksService } from '../tasks.service';
   imports: [
     CommonModule,
     ConfirmationDialogComponent,
-    MatFormFieldModule,
-    MatSelectModule,
     PageIntroComponent,
     ReactiveFormsModule,
     RouterLink
@@ -38,46 +34,55 @@ import { TasksService } from '../tasks.service';
           <p>{{ taskSummary() }}</p>
         </div>
 
-        <button type="button" class="ghost-button" [disabled]="isLoading()" (click)="loadTasks()">
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm"
+          [disabled]="isLoading()"
+          (click)="loadTasks()"
+        >
           {{ isLoading() ? 'Refreshing...' : 'Refresh' }}
         </button>
       </div>
 
       <form class="filters" [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
-        <label>
-          Search
-          <input type="search" formControlName="search" placeholder="Search by title" />
-        </label>
+        <div class="filter-control">
+          <label class="form-label" for="taskSearch">Search</label>
+          <input
+            id="taskSearch"
+            class="form-control"
+            type="search"
+            formControlName="search"
+            placeholder="Search by title"
+          />
+        </div>
 
         <div class="filter-control">
-          <span class="filter-label">Category</span>
-          <mat-form-field class="app-material-field filter-field">
-            <mat-select formControlName="categoryId">
-              <mat-option value="">All categories</mat-option>
-              @for (category of categories(); track category.id) {
-                <mat-option [value]="category.id">{{ category.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+          <label class="form-label" for="taskCategoryFilter">Category</label>
+          <select id="taskCategoryFilter" class="form-select" formControlName="categoryId">
+            <option value="">All categories</option>
+            @for (category of categories(); track category.id) {
+              <option [value]="category.id">{{ category.name }}</option>
+            }
+          </select>
         </div>
 
         <div class="filter-actions">
           <button
             type="button"
-            class="ghost-button"
+            class="btn btn-outline-secondary"
             [disabled]="!hasActiveFilters() || isLoading()"
             (click)="clearFilters()"
           >
             Clear
           </button>
-          <button type="submit" class="primary-button">Apply</button>
+          <button type="submit" class="btn btn-primary">Apply</button>
         </div>
       </form>
 
       @if (categoryErrorMessage()) {
-        <div class="filter-notice" role="status">
-          <p>{{ categoryErrorMessage() }}</p>
-          <button type="button" class="ghost-button" (click)="loadCategories()">
+        <div class="alert alert-warning d-flex justify-content-between align-items-center" role="status">
+          <span>{{ categoryErrorMessage() }}</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="loadCategories()">
             Retry categories
           </button>
         </div>
@@ -96,7 +101,9 @@ import { TasksService } from '../tasks.service';
         <div class="empty-state error-state">
           <h3>Tasks could not load</h3>
           <p>{{ errorMessage() }}</p>
-          <button type="button" class="ghost-button" (click)="loadTasks()">Try again</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="loadTasks()">
+            Try again
+          </button>
         </div>
       } @else if (tasksResult().items.length === 0) {
         <div class="empty-state">
@@ -113,6 +120,7 @@ import { TasksService } from '../tasks.service';
               <div class="task-main">
                 <label class="completion-toggle">
                   <input
+                    class="form-check-input"
                     type="checkbox"
                     [checked]="task.isCompleted"
                     [disabled]="updatingTaskId() === task.id"
@@ -138,10 +146,12 @@ import { TasksService } from '../tasks.service';
               </div>
 
               <div class="task-actions">
-                <a [routerLink]="['/tasks', task.id, 'edit']">Edit</a>
+                <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/tasks', task.id, 'edit']">
+                  Edit
+                </a>
                 <button
                   type="button"
-                  class="danger-button"
+                  class="btn btn-sm btn-outline-danger"
                   [disabled]="deletingTaskId() === task.id"
                   (click)="requestTaskDelete(task)"
                 >
@@ -158,7 +168,7 @@ import { TasksService } from '../tasks.service';
 
         <button
           type="button"
-          class="ghost-button"
+          class="btn btn-outline-secondary btn-sm"
           [disabled]="currentPage() <= 1 || isLoading()"
           (click)="goToPage(currentPage() - 1)"
         >
@@ -169,7 +179,7 @@ import { TasksService } from '../tasks.service';
 
         <button
           type="button"
-          class="ghost-button"
+          class="btn btn-outline-secondary btn-sm"
           [disabled]="currentPage() >= totalPages() || isLoading()"
           (click)="goToPage(currentPage() + 1)"
         >
