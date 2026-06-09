@@ -10,6 +10,12 @@ export const routes: Routes = [
     canActivateChild: [publicOnlyGuard],
     children: [
       {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./features/home/home-page.component').then((module) => module.HomePageComponent)
+      },
+      {
         path: 'login',
         loadComponent: () =>
           import('./features/auth/pages/login-page.component').then(

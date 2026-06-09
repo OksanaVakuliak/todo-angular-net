@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
 
-export type AppTheme = 'green' | 'gold' | 'light' | 'dark';
+export type AppTheme = 'light' | 'dark';
 
 export interface ThemeOption {
   label: string;
@@ -9,10 +9,8 @@ export interface ThemeOption {
 }
 
 const storageKey = 'todo-ui-theme';
-const defaultTheme: AppTheme = 'green';
+const defaultTheme: AppTheme = 'light';
 const themes: ThemeOption[] = [
-  { label: 'Green', value: 'green' },
-  { label: 'Gold', value: 'gold' },
   { label: 'Light', value: 'light' },
   { label: 'Dark', value: 'dark' },
 ];

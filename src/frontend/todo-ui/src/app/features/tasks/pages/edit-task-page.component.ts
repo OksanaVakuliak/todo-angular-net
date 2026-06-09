@@ -1,6 +1,10 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
@@ -11,7 +15,15 @@ import { TasksService } from '../tasks.service';
 @Component({
   selector: 'app-edit-task-page',
   standalone: true,
-  imports: [PageIntroComponent, ReactiveFormsModule, RouterLink],
+  imports: [
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    PageIntroComponent,
+    ReactiveFormsModule,
+    RouterLink
+  ],
   template: `
     <app-page-intro
       eyebrow="Tasks"
@@ -54,24 +66,22 @@ import { TasksService } from '../tasks.service';
         </label>
 
         <div class="form-grid">
-          <label>
-            Category
-            <span class="select-control">
-              <select formControlName="categoryId">
-                <option value="">No category</option>
-                @for (category of categories(); track category.id) {
-                  <option [value]="category.id">{{ category.name }}</option>
-                }
-              </select>
-            </span>
-          </label>
+          <mat-form-field class="app-material-field">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="categoryId">
+              <mat-option value="">No category</mat-option>
+              @for (category of categories(); track category.id) {
+                <mat-option [value]="category.id">{{ category.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
-          <label>
-            Due date
-            <span class="date-control">
-              <input type="datetime-local" formControlName="dueAt" />
-            </span>
-          </label>
+          <mat-form-field class="app-material-field">
+            <mat-label>Due date</mat-label>
+            <input matInput [matDatepicker]="dueDatePicker" formControlName="dueDate" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="dueDatePicker" />
+            <mat-datepicker #dueDatePicker />
+          </mat-form-field>
         </div>
 
         <label class="checkbox-label">
@@ -113,7 +123,7 @@ export class EditTaskPageComponent {
     title: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(200)]],
     description: ['', [Validators.maxLength(2000)]],
     categoryId: [''],
-    dueAt: [''],
+    dueDate: this.formBuilder.control<Date | null>(null),
     isCompleted: [false]
   });
 
@@ -152,7 +162,7 @@ export class EditTaskPageComponent {
       categoryId: formValue.categoryId || null,
       title: formValue.title.trim(),
       description: formValue.description.trim() || null,
-      dueAt: formValue.dueAt ? new Date(formValue.dueAt).toISOString() : null,
+      dueAt: this.toDueAtIsoString(formValue.dueDate),
       isCompleted: formValue.isCompleted
     };
   }
@@ -188,19 +198,29 @@ export class EditTaskPageComponent {
   }
 
   private patchForm(task: TaskItem): void {
+    const dueDateTime = task.dueAt ? new Date(task.dueAt) : null;
+
     this.taskForm.setValue({
       title: task.title,
       description: task.description ?? '',
       categoryId: task.categoryId ?? '',
-      dueAt: task.dueAt ? this.toDateTimeLocalValue(task.dueAt) : '',
+      dueDate: dueDateTime ? this.toDateControlValue(dueDateTime) : null,
       isCompleted: task.isCompleted
     });
   }
 
-  private toDateTimeLocalValue(value: string): string {
-    const date = new Date(value);
-    const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  private toDueAtIsoString(dueDate: Date | null): string | null {
+    if (!dueDate) {
+      return null;
+    }
 
-    return offsetDate.toISOString().slice(0, 16);
+    const date = new Date(dueDate);
+    date.setHours(0, 0, 0, 0);
+
+    return date.toISOString();
+  }
+
+  private toDateControlValue(value: Date): Date {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
   }
 }

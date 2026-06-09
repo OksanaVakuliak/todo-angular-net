@@ -2,14 +2,6 @@
   <aside class="sidebar">
     <a class="brand" routerLink="/tasks" aria-label="To-Do App home">To-Do App</a>
 
-    <nav class="nav">
-      <a routerLink="/tasks" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-        Tasks
-      </a>
-      <a routerLink="/tasks/new" routerLinkActive="active">New Task</a>
-      <a routerLink="/categories" routerLinkActive="active">Categories</a>
-    </nav>
-
     <div class="sidebar-footer" aria-label="Account actions">
       <app-theme-switcher />
       @if (authService.currentUser(); as user) {
@@ -17,6 +9,14 @@
       }
       <button type="button" class="logout-button" (click)="logout()">Sign out</button>
     </div>
+
+    <nav class="nav">
+      <a routerLink="/tasks" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        Tasks
+      </a>
+      <a routerLink="/tasks/new" routerLinkActive="active">New Task</a>
+      <a routerLink="/categories" routerLinkActive="active">Categories</a>
+    </nav>
   </aside>
 
   <main class="content">

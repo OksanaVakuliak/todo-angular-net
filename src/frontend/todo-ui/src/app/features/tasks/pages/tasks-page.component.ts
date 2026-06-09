@@ -2,6 +2,8 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, DestroyRef, OnDestroy, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import { Category } from '../../categories/category.models';
 import { CategoriesService } from '../../categories/categories.service';
@@ -16,6 +18,8 @@ import { TasksService } from '../tasks.service';
   imports: [
     CommonModule,
     ConfirmationDialogComponent,
+    MatFormFieldModule,
+    MatSelectModule,
     PageIntroComponent,
     ReactiveFormsModule,
     RouterLink
@@ -45,17 +49,17 @@ import { TasksService } from '../tasks.service';
           <input type="search" formControlName="search" placeholder="Search by title" />
         </label>
 
-        <label>
-          Category
-          <span class="select-control">
-            <select formControlName="categoryId">
-              <option value="">All categories</option>
+        <div class="filter-control">
+          <mat-form-field class="app-material-field filter-field">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="categoryId">
+              <mat-option value="">All categories</mat-option>
               @for (category of categories(); track category.id) {
-                <option [value]="category.id">{{ category.name }}</option>
+                <mat-option [value]="category.id">{{ category.name }}</mat-option>
               }
-            </select>
-          </span>
-        </label>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
         <div class="filter-actions">
           <button
@@ -444,15 +448,15 @@ export class TasksPageComponent implements OnDestroy {
   private getRelativeLuminance(color: string): number {
     const normalizedColor = color.replace('#', '');
     const red = Number.parseInt(normalizedColor.slice(0, 2), 16);
-    const green = Number.parseInt(normalizedColor.slice(2, 4), 16);
+    const middleChannel = Number.parseInt(normalizedColor.slice(2, 4), 16);
     const blue = Number.parseInt(normalizedColor.slice(4, 6), 16);
-    const [linearRed, linearGreen, linearBlue] = [red, green, blue].map((channel) => {
+    const [linearRed, linearMiddle, linearBlue] = [red, middleChannel, blue].map((channel) => {
       const value = channel / 255;
 
       return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
     });
 
-    return 0.2126 * linearRed + 0.7152 * linearGreen + 0.0722 * linearBlue;
+    return 0.2126 * linearRed + 0.7152 * linearMiddle + 0.0722 * linearBlue;
   }
 
   private getTaskCategoryColor(task: TaskItem): string | null {

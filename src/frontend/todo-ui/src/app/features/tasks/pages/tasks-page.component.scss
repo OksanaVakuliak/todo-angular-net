@@ -66,6 +66,7 @@
 }
 
 .filters {
+  --filter-control-height: 3rem;
   align-items: end;
   background: var(--color-surface-muted);
   border: 1px solid var(--color-border);
@@ -78,7 +79,8 @@
   padding: 1rem;
 }
 
-.filters label {
+.filters label,
+.filter-control {
   color: var(--color-text);
   display: grid;
   font-size: 0.9rem;
@@ -87,21 +89,20 @@
   min-width: 0;
 }
 
-.filters input,
-.filters select {
+.filters input {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   color: var(--color-text);
   font: inherit;
-  min-height: 2.6rem;
-  padding: 0.7rem 0.8rem;
+  height: var(--filter-control-height);
+  min-height: var(--filter-control-height);
+  padding: 0 0.85rem;
   transition: all var(--transition-control);
   width: 100%;
 }
 
-.filters input:focus,
-.filters select:focus {
+.filters input:focus {
   border-color: var(--color-focus);
   box-shadow: var(--shadow-focus);
   outline: none;
@@ -112,6 +113,22 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   min-width: 0;
+}
+
+.filter-actions .ghost-button,
+.filter-actions .primary-button {
+  height: var(--filter-control-height);
+  min-height: var(--filter-control-height);
+}
+
+.filter-field {
+  --mat-form-field-container-height: var(--filter-control-height);
+  --mat-form-field-filled-with-label-container-padding-top: 0.7rem;
+  --mat-form-field-filled-with-label-container-padding-bottom: 0.35rem;
+}
+
+.filter-field .mat-mdc-text-field-wrapper {
+  height: var(--filter-control-height);
 }
 
 .alert {

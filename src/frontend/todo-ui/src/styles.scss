@@ -1,78 +1,12 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
 * {
   box-sizing: border-box;
 }
 
 :root,
-:root[data-theme='green'] {
-  --palette-1: #a5cf83;
-  --palette-2: #f0e76f;
-  --palette-3: #ecb65f;
-  --palette-4: #e89951;
-  --color-bg: #f6f0d7;
-  --color-app: #182012;
-  --color-sidebar: #222c19;
-  --color-bg-strong: #182012;
-  --color-surface: #2f3a24;
-  --color-surface-raised: #39462c;
-  --color-surface-muted: #465332;
-  --color-border: #65744a;
-  --color-border-strong: #ecb65f;
-  --color-text: #fff9df;
-  --color-muted: #e8d99c;
-  --color-primary: #a5cf83;
-  --color-primary-hover: #f0e76f;
-  --color-primary-soft: #515f37;
-  --color-primary-text: #182012;
-  --color-accent: #ecb65f;
-  --color-accent-strong: #e89951;
-  --color-focus: #a5cf83;
-  --color-danger: #b91c1c;
-  --color-danger-hover: #991b1b;
-  --color-danger-soft: #fef2f2;
-  --color-danger-border: #fecaca;
-  --color-danger-text: #991b1b;
-  --color-info-soft: #515f37;
-  --color-info-border: #ecb65f;
-  --color-info-text: #fff9df;
-  --shadow-soft: 0 1.5rem 4rem rgba(24, 32, 18, 0.18);
-  --shadow-strong: 0 1.5rem 4rem rgba(24, 32, 18, 0.3);
-  --shadow-focus: 0 0 0 0.2rem rgba(165, 207, 131, 0.2);
-  --shadow-item: 0 0.75rem 1.5rem color-mix(in srgb, var(--color-text) 6%, transparent);
-  --shadow-item-hover: 0 1rem 2rem color-mix(in srgb, var(--color-text) 10%, transparent);
-  --transition-control: 160ms ease;
-}
-
-:root[data-theme='gold'] {
-  --palette-1: #ff6a1c;
-  --palette-2: #ffda62;
-  --palette-3: #ffae56;
-  --palette-4: #f5788b;
-  --color-bg: #fff5e5;
-  --color-app: #15120f;
-  --color-sidebar: #211a16;
-  --color-bg-strong: #15120f;
-  --color-surface: #2d251f;
-  --color-surface-raised: #382d24;
-  --color-surface-muted: #463629;
-  --color-border: #604d3c;
-  --color-border-strong: #ffae56;
-  --color-text: #fff8ed;
-  --color-muted: #e4c5a2;
-  --color-primary: #ff6a1c;
-  --color-primary-hover: #d94f08;
-  --color-primary-soft: #fff0dc;
-  --color-primary-text: #2d1608;
-  --color-accent: #f5788b;
-  --color-accent-strong: #ffae56;
-  --color-focus: #ff6a1c;
-  --color-info-soft: #fff7d6;
-  --color-info-border: #ffda62;
-  --color-info-text: #7c3a09;
-  --shadow-soft: 0 1.5rem 4rem rgba(124, 58, 9, 0.12);
-  --shadow-strong: 0 1.5rem 4rem rgba(124, 58, 9, 0.24);
-  --shadow-focus: 0 0 0 0.2rem rgba(255, 106, 28, 0.2);
-}
-
 :root[data-theme='light'] {
   --palette-1: #fff9d2;
   --palette-2: #ffebcc;
@@ -102,6 +36,14 @@
   --shadow-soft: 0 1.5rem 4rem rgba(39, 54, 74, 0.1);
   --shadow-strong: 0 1.5rem 4rem rgba(39, 54, 74, 0.22);
   --shadow-focus: 0 0 0 0.2rem rgba(140, 192, 235, 0.26);
+  --shadow-item: 0 0.75rem 1.5rem color-mix(in srgb, var(--color-text) 6%, transparent);
+  --shadow-item-hover: 0 1rem 2rem color-mix(in srgb, var(--color-text) 10%, transparent);
+  --transition-control: 160ms ease;
+  --material-overlay-bg: var(--color-surface);
+  --material-overlay-text: var(--color-text);
+  --material-overlay-muted: var(--color-muted);
+  --material-scrollbar-thumb: var(--color-border-strong);
+  --material-scrollbar-track: var(--color-surface);
 }
 
 :root[data-theme='dark'] {
@@ -236,61 +178,189 @@ button:disabled {
   opacity: 0.58;
 }
 
-.select-control,
-.date-control {
+.app-material-field {
+  --mdc-filled-text-field-active-indicator-color: var(--color-border);
+  --mdc-filled-text-field-caret-color: var(--color-text);
+  --mdc-filled-text-field-container-color: var(--color-surface);
+  --mdc-filled-text-field-disabled-container-color: var(--color-surface-muted);
+  --mdc-filled-text-field-focus-active-indicator-color: var(--color-focus);
+  --mdc-filled-text-field-focus-label-text-color: var(--color-focus);
+  --mdc-filled-text-field-hover-active-indicator-color: var(--color-border-strong);
+  --mdc-filled-text-field-input-text-color: var(--color-text);
+  --mdc-filled-text-field-label-text-color: var(--color-muted);
+  --mdc-filled-text-field-supporting-text-color: var(--color-muted);
+  --mat-form-field-container-height: 3rem;
+  --mat-form-field-container-vertical-padding: 0.55rem;
+  --mat-form-field-filled-with-label-container-padding-top: 1rem;
+  --mat-form-field-filled-with-label-container-padding-bottom: 0.35rem;
+  --mat-select-enabled-arrow-color: var(--color-primary);
+  --mat-select-focused-arrow-color: var(--color-focus);
+  --mat-select-enabled-trigger-text-color: var(--color-text);
+  --mat-select-placeholder-text-color: var(--color-muted);
   display: block;
-  position: relative;
+  width: 100%;
 }
 
-.select-control select {
-  appearance: none;
-  padding-right: 2.5rem;
+.app-material-field .mat-mdc-text-field-wrapper {
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  transition:
+    background-color var(--transition-control),
+    border-color var(--transition-control),
+    box-shadow var(--transition-control),
+    transform var(--transition-control);
 }
 
-.select-control::after {
-  border-bottom: 2px solid var(--color-primary);
-  border-right: 2px solid var(--color-primary);
-  content: '';
-  height: 0.45rem;
-  pointer-events: none;
-  position: absolute;
-  right: 1rem;
-  top: 0.95rem;
-  transform: rotate(45deg);
+.app-material-field .mat-mdc-text-field-wrapper:hover {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
+  transform: translateY(-1px);
+}
+
+.app-material-field.mat-focused .mat-mdc-text-field-wrapper {
+  background: var(--color-surface-raised);
+  border-color: var(--color-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.app-material-field .mdc-line-ripple {
+  display: none;
+}
+
+.app-material-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.filter-field .mat-mdc-text-field-wrapper,
+.filter-field .mat-mdc-form-field-flex,
+.filter-field .mat-mdc-form-field-infix {
+  min-height: var(--filter-control-height);
+}
+
+.filter-field .mat-mdc-text-field-wrapper {
+  height: var(--filter-control-height);
+}
+
+.filter-field .mat-mdc-form-field-infix {
+  padding-bottom: 0.35rem;
+  padding-top: 0.65rem;
+}
+
+.cdk-overlay-pane {
+  --mat-datepicker-calendar-container-background-color: var(--material-overlay-bg);
+  --mat-datepicker-calendar-container-text-color: var(--material-overlay-text);
+  --mat-datepicker-calendar-date-text-color: var(--material-overlay-text);
+  --mat-datepicker-calendar-body-label-text-color: var(--material-overlay-text);
+  --mat-datepicker-calendar-header-text-color: var(--material-overlay-text);
+  --mat-datepicker-calendar-period-button-text-color: var(--material-overlay-text);
+  --mat-datepicker-calendar-navigation-button-icon-color: var(--color-primary);
+  --mat-datepicker-calendar-date-today-outline-color: var(--color-primary);
+  --mat-datepicker-calendar-date-selected-state-background-color: var(--color-primary);
+  --mat-datepicker-calendar-date-selected-state-text-color: var(--color-primary-text);
+  --mat-datepicker-calendar-date-hover-state-background-color: var(--color-surface-muted);
+  --mat-select-panel-background-color: var(--material-overlay-bg);
+  --mat-select-enabled-trigger-text-color: var(--material-overlay-text);
+  --mat-option-label-text-color: var(--material-overlay-text);
+  --mat-option-hover-state-layer-color: var(--color-surface-muted);
+  --mat-option-selected-state-layer-color: var(--color-surface-muted);
+}
+
+.mat-mdc-select-panel,
+.mat-datepicker-content,
+.mat-calendar,
+.mat-calendar-content,
+.mat-calendar-header {
+  background: var(--material-overlay-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-strong);
+  color: var(--material-overlay-text);
+}
+
+.mat-mdc-select-panel {
+  padding: 0.35rem;
+}
+
+.mat-mdc-select-panel {
+  scrollbar-color: var(--material-scrollbar-thumb) var(--material-scrollbar-track);
+  scrollbar-width: thin;
+}
+
+.mat-mdc-select-panel::-webkit-scrollbar {
   width: 0.45rem;
 }
 
-.date-control::before,
-.date-control::after {
-  content: '';
-  pointer-events: none;
-  position: absolute;
+.mat-mdc-select-panel::-webkit-scrollbar-track {
+  background: var(--material-scrollbar-track);
+  border-radius: 999px;
 }
 
-.date-control::before {
-  border: 2px solid var(--color-primary);
-  border-radius: 0.25rem;
-  height: 1rem;
-  right: 0.85rem;
-  top: 0.8rem;
-  width: 1rem;
+.mat-mdc-select-panel::-webkit-scrollbar-thumb {
+  background: var(--material-scrollbar-thumb);
+  border: 2px solid var(--material-scrollbar-track);
+  border-radius: 999px;
 }
 
-.date-control::after {
+.mat-mdc-select-panel::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary);
-  height: 2px;
-  right: 1.05rem;
-  top: 1.1rem;
-  width: 0.65rem;
 }
 
-.date-control input {
-  padding-right: 2.5rem;
+.mat-mdc-option,
+.mat-mdc-option .mdc-list-item__primary-text {
+  color: var(--material-overlay-text);
+  transition:
+    background-color var(--transition-control),
+    color var(--transition-control);
 }
 
-.date-control input::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0;
-  position: absolute;
-  right: 0.75rem;
+.mat-mdc-option:hover,
+.mat-mdc-option.mdc-list-item--selected {
+  background: var(--color-surface-muted);
+}
+
+.mat-calendar,
+.mat-calendar-body-cell-content,
+.mat-calendar-body-label,
+.mat-calendar-table-header,
+.mat-calendar-period-button {
+  color: var(--material-overlay-text);
+}
+
+.mat-calendar-body-cell-content,
+.mat-calendar-period-button,
+.mat-calendar-previous-button,
+.mat-calendar-next-button,
+.mat-datepicker-toggle {
+  transition:
+    background-color var(--transition-control),
+    border-color var(--transition-control),
+    box-shadow var(--transition-control),
+    color var(--transition-control),
+    transform var(--transition-control);
+}
+
+.mat-calendar-arrow,
+.mat-calendar-previous-button,
+.mat-calendar-next-button,
+.mat-datepicker-toggle {
+  color: var(--color-primary);
+}
+
+.mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover
+  .mat-calendar-body-cell-content {
+  background: var(--color-surface-muted);
+  transform: scale(1.04);
+}
+
+.mat-calendar-body-cell.mat-calendar-body-active .mat-calendar-body-cell-content {
+  box-shadow: var(--shadow-focus);
+}
+
+.mat-calendar-body-selected {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+}
+
+.mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: var(--color-primary);
 }

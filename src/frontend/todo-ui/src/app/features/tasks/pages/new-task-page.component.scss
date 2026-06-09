@@ -25,8 +25,7 @@ label {
   gap: 0.4rem;
 }
 
-input,
-select,
+input:not(.mat-mdc-input-element),
 textarea {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -56,8 +55,7 @@ textarea {
   width: 1rem;
 }
 
-input:focus,
-select:focus,
+input:not(.mat-mdc-input-element):focus,
 textarea:focus {
   border-color: var(--color-focus);
   box-shadow: var(--shadow-focus);
@@ -153,5 +151,11 @@ button:focus {
   button {
     text-align: center;
     width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
   }
 }
