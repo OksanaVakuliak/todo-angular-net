@@ -74,6 +74,15 @@ import { TasksService } from '../tasks.service';
         </div>
       </form>
 
+      @if (categoryErrorMessage()) {
+        <div class="filter-notice" role="status">
+          <p>{{ categoryErrorMessage() }}</p>
+          <button type="button" class="ghost-button" (click)="loadCategories()">
+            Retry categories
+          </button>
+        </div>
+      }
+
       @if (showInlineRefreshMessage()) {
         <p class="muted status-message" role="status">Refreshing tasks...</p>
       }
@@ -200,6 +209,7 @@ export class TasksPageComponent {
   private latestLoadId = 0;
 
   protected readonly categories = signal<Category[]>([]);
+  protected readonly categoryErrorMessage = signal('');
   protected readonly currentPage = signal(1);
   protected readonly deletingTaskId = signal<string | null>(null);
   protected readonly errorMessage = signal('');
@@ -405,6 +415,8 @@ export class TasksPageComponent {
   }
 
   private loadCategories(): void {
+    this.categoryErrorMessage.set('');
+
     this.categoriesService
       .listCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -412,7 +424,15 @@ export class TasksPageComponent {
         next: (categories) => {
           this.categories.set(categories);
         },
-        error: () => this.categories.set([])
+        error: (error) => {
+          this.categories.set([]);
+          this.categoryErrorMessage.set(
+            this.categoriesService.getErrorMessage(
+              error,
+              'Categories could not load. Tasks are still available, but category filters may be incomplete.'
+            )
+          );
+        }
       });
   }
 }
