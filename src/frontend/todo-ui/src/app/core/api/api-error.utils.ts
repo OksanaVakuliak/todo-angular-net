@@ -12,16 +12,24 @@ export function getApiErrorMessage(error: unknown, fallback: string): string {
 
   const body = error.error as ApiErrorBody | string | null | undefined;
 
-  if (typeof body === 'string' && body.trim().length > 0) {
-    return body;
+  if (typeof body === 'string') {
+    const message = body.trim();
+
+    if (message.length > 0) {
+      return message;
+    }
   }
 
   if (!body || typeof body !== 'object') {
     return fallback;
   }
 
-  if (typeof body.message === 'string' && body.message.trim().length > 0) {
-    return body.message;
+  if (typeof body.message === 'string') {
+    const message = body.message.trim();
+
+    if (message.length > 0) {
+      return message;
+    }
   }
 
   const validationMessage = getValidationErrorMessage(body.errors);
@@ -38,5 +46,5 @@ function getValidationErrorMessage(errors: unknown): string | null {
     .flatMap((value) => (Array.isArray(value) ? value : [value]))
     .filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
 
-  return messages.length > 0 ? messages[0] : null;
+  return messages.length > 0 ? messages[0].trim() : null;
 }

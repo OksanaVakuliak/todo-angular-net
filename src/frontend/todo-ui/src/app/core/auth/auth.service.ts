@@ -12,6 +12,7 @@ export class AuthService {
   private readonly currentUserSignal = signal<User | null>(null);
   private readonly statusSignal = signal<AuthStatus>('checking');
   private sessionRequest?: Observable<User | null>;
+  private refreshRequest?: Observable<User | null>;
   private sessionLoaded = false;
   private sessionVersion = 0;
 
@@ -93,20 +94,32 @@ export class AuthService {
   }
 
   refreshSession(): Observable<User | null> {
-    return defer(() => {
-      const version = this.beginSessionMutation();
+    if (this.refreshRequest) {
+      return this.refreshRequest;
+    }
 
-      return this.httpClient.post<AuthUserResponse>('/api/auth/refresh', {}).pipe(
-        map((response) => response.user),
-        tap((user) => this.setSessionIfCurrent(version, user)),
-        catchError(() => this.clearSessionIfCurrent(version))
-      );
-    });
+    const version = this.beginSessionMutation();
+    const request = this.httpClient.post<AuthUserResponse>('/api/auth/refresh', {}).pipe(
+      map((response) => response.user),
+      tap((user) => this.setSessionIfCurrent(version, user)),
+      catchError(() => this.clearSessionIfCurrent(version)),
+      finalize(() => {
+        if (this.refreshRequest === request) {
+          this.refreshRequest = undefined;
+        }
+      }),
+      shareReplay(1)
+    );
+
+    this.refreshRequest = request;
+
+    return request;
   }
 
   private beginSessionMutation(): number {
     this.sessionVersion += 1;
     this.sessionRequest = undefined;
+    this.refreshRequest = undefined;
 
     return this.sessionVersion;
   }

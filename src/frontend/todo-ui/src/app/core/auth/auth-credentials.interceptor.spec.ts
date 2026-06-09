@@ -78,6 +78,40 @@ describe('authCredentialsInterceptor', () => {
     expect(authService.currentUser()).toEqual(user);
   });
 
+  it('coalesces concurrent 401s into a single refresh and retries both requests', () => {
+    const firstResponse = [{ id: 'first' }];
+    const secondResponse = [{ id: 'second' }];
+    let firstResult: unknown;
+    let secondResult: unknown;
+
+    httpClient.get('/api/tasks').subscribe((result) => {
+      firstResult = result;
+    });
+    httpClient.get('/api/tasks').subscribe((result) => {
+      secondResult = result;
+    });
+
+    const initialRequests = httpTestingController.match('/api/tasks');
+    expect(initialRequests.length).toBe(2);
+    initialRequests.forEach((request) => {
+      request.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+    });
+
+    const refreshRequests = httpTestingController.match('/api/auth/refresh');
+    expect(refreshRequests.length).toBe(1);
+    expect(refreshRequests[0].request.withCredentials).toBeTrue();
+    refreshRequests[0].flush(authResponse);
+
+    const retryRequests = httpTestingController.match('/api/tasks');
+    expect(retryRequests.length).toBe(2);
+    retryRequests[0].flush(firstResponse);
+    retryRequests[1].flush(secondResponse);
+
+    expect(firstResult).toEqual(firstResponse);
+    expect(secondResult).toEqual(secondResponse);
+    expect(authService.currentUser()).toEqual(user);
+  });
+
   it('clears session and redirects to login when refresh cannot recover the session', () => {
     spyOn(authService, 'clearSession');
     spyOnProperty(router, 'url', 'get').and.returnValue('/tasks');

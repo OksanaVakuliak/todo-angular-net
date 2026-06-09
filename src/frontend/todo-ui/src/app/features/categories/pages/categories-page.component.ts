@@ -72,6 +72,13 @@ import { CategoriesService } from '../categories.service';
           <p class="muted status-message" role="status">Refreshing categories...</p>
         }
 
+        @if (!isLoading() && listErrorMessage() && categories().length > 0) {
+          <div class="alert error" role="alert">
+            <p>{{ listErrorMessage() }}</p>
+            <button type="button" class="ghost-button" (click)="loadCategories()">Try again</button>
+          </div>
+        }
+
         @if (showInitialLoading()) {
           <div class="loading-state" role="status" aria-live="polite">
             <span class="loading-dot"></span>

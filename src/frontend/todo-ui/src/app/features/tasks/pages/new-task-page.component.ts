@@ -56,9 +56,13 @@ import { TasksService } from '../tasks.service';
 
       <div class="form-grid">
         <div class="field-control">
-          <span class="field-label">Category</span>
+          <span id="newTaskCategoryLabel" class="field-label">Category</span>
           <mat-form-field class="app-material-field">
-            <mat-select formControlName="categoryId" [disabled]="isLoadingCategories()">
+            <mat-select
+              formControlName="categoryId"
+              aria-labelledby="newTaskCategoryLabel"
+              [disabled]="isLoadingCategories()"
+            >
               @if (isLoadingCategories()) {
                 <mat-option value="">Loading categories...</mat-option>
               } @else {

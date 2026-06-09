@@ -4,7 +4,7 @@ import { getApiErrorMessage } from './api-error.utils';
 describe('getApiErrorMessage', () => {
   it('returns backend error messages', () => {
     const error = new HttpErrorResponse({
-      error: { code: 'task_not_found', message: 'Task was not found.' },
+      error: { code: 'task_not_found', message: ' Task was not found. ' },
       status: 404
     });
 
@@ -17,7 +17,7 @@ describe('getApiErrorMessage', () => {
         code: 'validation_failed',
         message: '',
         errors: {
-          title: ['Title is required.'],
+          title: [' Title is required. '],
           dueAt: ['Due date is invalid.']
         }
       },
