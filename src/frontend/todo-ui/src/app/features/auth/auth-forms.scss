@@ -1,0 +1,19 @@
+.auth-form,
+.login-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-label {
+  font-weight: 700;
+}
+
+.auth-switch {
+  color: var(--color-muted);
+  margin: 1rem 0 0;
+}
+
+.auth-switch a {
+  color: var(--color-primary);
+  font-weight: 800;
+}

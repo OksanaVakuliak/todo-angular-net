@@ -1,0 +1,11 @@
+.task-form {
+  margin-inline: auto;
+  max-width: 42rem;
+  padding: 1.5rem;
+  width: min(100%, 42rem);
+}
+
+.actions {
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+}

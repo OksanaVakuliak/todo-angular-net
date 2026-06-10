@@ -1,0 +1,159 @@
+@TodoApp.Api_HostAddress = http://localhost:5020
+
+GET {{TodoApp.Api_HostAddress}}/api/health
+Accept: application/json
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "oksana@example.com",
+  "password": "ChangeMe123!",
+  "displayName": "Oksana"
+}
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "oksana@example.com",
+  "password": "ChangeMe123!"
+}
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/auth/me
+Accept: application/json
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/auth/refresh
+Accept: application/json
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/auth/logout
+Accept: application/json
+
+###
+
+@CategoryId = replace-with-category-id
+
+GET {{TodoApp.Api_HostAddress}}/api/categories
+Accept: application/json
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/categories
+Content-Type: application/json
+
+{
+  "name": "Work",
+  "color": "#2563eb"
+}
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/categories/{{CategoryId}}
+Accept: application/json
+
+###
+
+PATCH {{TodoApp.Api_HostAddress}}/api/categories/{{CategoryId}}
+Content-Type: application/json
+
+{
+  "color": "#16a34a"
+}
+
+###
+
+PATCH {{TodoApp.Api_HostAddress}}/api/categories/{{CategoryId}}
+Content-Type: application/json
+
+{
+  "name": "Personal",
+  "color": null
+}
+
+###
+
+DELETE {{TodoApp.Api_HostAddress}}/api/categories/{{CategoryId}}
+Accept: application/json
+
+###
+
+@TaskId = replace-with-task-id
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks
+Accept: application/json
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks?page=1&limit=10
+Accept: application/json
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks?search=weekly
+Accept: application/json
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks?categoryId={{CategoryId}}
+Accept: application/json
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks?page=1&limit=10&search=weekly&categoryId={{CategoryId}}
+Accept: application/json
+
+###
+
+POST {{TodoApp.Api_HostAddress}}/api/tasks
+Content-Type: application/json
+
+{
+  "categoryId": "{{CategoryId}}",
+  "title": "Prepare weekly plan",
+  "description": "Review priorities and choose the next tasks.",
+  "dueAt": "2026-06-12T09:00:00+03:00"
+}
+
+###
+
+GET {{TodoApp.Api_HostAddress}}/api/tasks/{{TaskId}}
+Accept: application/json
+
+###
+
+PATCH {{TodoApp.Api_HostAddress}}/api/tasks/{{TaskId}}
+Content-Type: application/json
+
+{
+  "categoryId": null,
+  "title": "Prepare weekly plan",
+  "description": "Review priorities and choose the next tasks.",
+  "isCompleted": true,
+  "dueAt": null
+}
+
+###
+
+PATCH {{TodoApp.Api_HostAddress}}/api/tasks/{{TaskId}}
+Content-Type: application/json
+
+{
+  "isCompleted": true
+}
+
+###
+
+DELETE {{TodoApp.Api_HostAddress}}/api/tasks/{{TaskId}}
+Accept: application/json
+
+###

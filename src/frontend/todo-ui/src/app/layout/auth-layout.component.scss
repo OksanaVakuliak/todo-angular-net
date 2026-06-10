@@ -1,0 +1,35 @@
+.auth-layout {
+  background: var(--color-app);
+}
+
+.auth-panel {
+  max-width: 34rem;
+}
+
+.home-auth-layout .auth-panel {
+  max-width: 64rem;
+}
+
+.brand {
+  align-items: center;
+  color: var(--color-text);
+  display: inline-flex;
+  font-size: 1rem;
+  font-weight: 900;
+  gap: 0.55rem;
+  text-decoration: none;
+  transition: color var(--transition-control);
+}
+
+.brand::before {
+  background: var(--color-primary);
+  border-radius: 0.35rem;
+  content: '';
+  display: inline-flex;
+  height: 1.35rem;
+  width: 1.35rem;
+}
+
+.brand:hover {
+  color: var(--color-primary);
+}
