@@ -12,11 +12,13 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
+        title: 'Todo App — organize your tasks',
         loadComponent: () =>
           import('./features/home/home-page.component').then((module) => module.HomePageComponent)
       },
       {
         path: 'login',
+        title: 'Sign in — Todo App',
         loadComponent: () =>
           import('./features/auth/pages/login-page.component').then(
             (module) => module.LoginPageComponent
@@ -24,6 +26,7 @@ export const routes: Routes = [
       },
       {
         path: 'register',
+        title: 'Create account — Todo App',
         loadComponent: () =>
           import('./features/auth/pages/register-page.component').then(
             (module) => module.RegisterPageComponent
@@ -43,6 +46,7 @@ export const routes: Routes = [
       },
       {
         path: 'tasks',
+        title: 'Tasks — Todo App',
         loadComponent: () =>
           import('./features/tasks/pages/tasks-page.component').then(
             (module) => module.TasksPageComponent
@@ -50,6 +54,7 @@ export const routes: Routes = [
       },
       {
         path: 'tasks/new',
+        title: 'New task — Todo App',
         loadComponent: () =>
           import('./features/tasks/pages/new-task-page.component').then(
             (module) => module.NewTaskPageComponent
@@ -57,6 +62,7 @@ export const routes: Routes = [
       },
       {
         path: 'tasks/:taskId/edit',
+        title: 'Edit task — Todo App',
         loadComponent: () =>
           import('./features/tasks/pages/edit-task-page.component').then(
             (module) => module.EditTaskPageComponent
@@ -64,6 +70,7 @@ export const routes: Routes = [
       },
       {
         path: 'categories',
+        title: 'Categories — Todo App',
         loadComponent: () =>
           import('./features/categories/pages/categories-page.component').then(
             (module) => module.CategoriesPageComponent
